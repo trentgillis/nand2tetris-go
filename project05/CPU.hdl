@@ -1,0 +1,72 @@
+/**
+ * The Hack Central Processing unit (CPU).
+ * Parses the binary code in the instruction input and executes it according to the
+ * Hack machine language specification. In the case of a C-instruction, computes the
+ * function specified by the instruction. If the instruction specifies to read a memory
+ * value, the inM input is expected to contain this value. If the instruction specifies
+ * to write a value to the memory, sets the outM output to this value, sets the addressM
+ * output to the target address, and asserts the writeM output (when writeM = 0, any
+ * value may appear in outM).
+ * If the reset input is 0, computes the address of the next instruction and sets the
+ * pc output to that value. If the reset input is 1, sets pc to 0.
+ * Note: The outM and writeM outputs are combinational: they are affected by the
+ * instruction's execution during the current cycle. The addressM and pc outputs are
+ * clocked: although they are affected by the instruction's execution, they commit to
+ * their new values only in the next cycle.
+ */
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset==1) or continue executing
+                         // the current program (reset==0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write to M?
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+    PARTS:
+    // Determine if we have an A or a C instruction
+    Not(in=instruction[15], out=ainst);
+    Not(in=ainst, out=cinst);
+
+    // Determine register loads for C instructions
+    Or(a=instruction[3], b=false, out=cloadm);
+    Or(a=instruction[4], b=false, out=cloadd);
+    Or(a=instruction[5], b=false, out=cloada);
+
+    // Load ALU output or instruction into A register based on instruciton type and if load A bit is set
+    And(a=cinst, b=cloada, out=alutoa);
+    Mux16(a=instruction, b=aluout, sel=alutoa, out=toareg);
+    Or(a=ainst, b=alutoa, out=loada);
+    ARegister(in=toareg, load=loada, out=areg);
+
+    // Determine if we are loading from the A register or inM based on a bit
+    Mux16(a=areg, b=inM, sel=instruction[12], out=aregorm);
+
+    // Load ALU output into D register if load D bit is set
+    And(a=cinst, b=cloadd, out=loadd);
+    DRegister(in=aluout, load=loadd, out=dreg);
+
+    // Run calcuation through ALU using register/memory inputs and c bits
+    ALU(x=dreg, y=aregorm, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=aluout, zr=zrout, ng=ngout);
+
+    // Map to memory output pins
+    Or16(a=areg, b=false, out[0..14]=addressM);
+    Or16(a=aluout, b=false, out=outM);
+    And(a=cinst, b=cloadm, out=writeM);
+
+    // Load values into PC baed on jump and ALU outputs
+    And(a=ngout, b=instruction[2], out=jlt);
+    And(a=zrout, b=instruction[1], out=jeq);
+    Or(a=zrout, b=ngout, out=lte);
+    Not(in=lte, out=pos);
+    And(a=pos, b=instruction[0], out=jgt);
+    Or(a=jlt, b=jeq, out=jle);
+    Or(a=jle, b=jgt, out=jumptoa);
+    And(a=cinst, b=jumptoa, out=loadpc);
+    Not(in=loadpc, out=incpc);
+    PC(in=areg, load=loadpc, inc=incpc, reset=reset, out[0..14]=pc);
+}
