@@ -55,3 +55,8 @@ func (p *Parser) CurrentInstructionType() int {
 
 	return C_INSTRUCTION
 }
+
+func (p *Parser) Symbol() string {
+	after, _ := strings.CutPrefix(p.currentInstruction, "@")
+	return after
+}
