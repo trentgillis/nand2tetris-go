@@ -11,10 +11,12 @@ import (
 type Assembler struct {
 	outfile *os.File
 	parser  Parser
+	codegen CodeGen
 }
 
 func New(f *os.File) Assembler {
 	p := NewParser(f)
+	c := CodeGen{}
 
 	outfile, err := os.Create(strings.Replace(f.Name(), ".asm", ".hack", 1))
 	if err != nil {
@@ -24,13 +26,14 @@ func New(f *os.File) Assembler {
 	return Assembler{
 		outfile: outfile,
 		parser:  p,
+		codegen: c,
 	}
 }
 
 func (a Assembler) Assemble() {
+	a.parser.Advance()
 	for a.parser.HasMoreLines {
-		a.parser.Advance()
-		switch a.parser.CurrentInstructionType() {
+		switch a.parser.CurrInstType() {
 		case A_INSTRUCTION:
 			a.writeAInst()
 		case C_INSTRUCTION:
@@ -38,6 +41,8 @@ func (a Assembler) Assemble() {
 		case L_INSTRUCTION:
 			a.writeLInst()
 		}
+
+		a.parser.Advance()
 	}
 }
 
@@ -56,7 +61,15 @@ func (a Assembler) writeAInst() {
 }
 
 func (a Assembler) writeCInst() {
-	a.outfile.WriteString("TODO\n")
+	dest := a.parser.Dest()
+	comp := a.parser.Comp()
+	jump := a.parser.Jump()
+	aBit := "0"
+	if strings.Contains(comp, "M") {
+		aBit = "1"
+	}
+
+	fmt.Fprintf(a.outfile, "111%s%s%s%s\n", aBit, a.codegen.Comp(comp), a.codegen.Dest(dest), a.codegen.Jump(jump))
 }
 
 func (a Assembler) writeLInst() {

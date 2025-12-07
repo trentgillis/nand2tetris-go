@@ -16,3 +16,6 @@ clean:
 
 run: build
 	./hackassembler ./asm/add/Add.asm
+	./hackassembler ./asm/max/MaxL.asm
+	./hackassembler ./asm/pong/PongL.asm
+	./hackassembler ./asm/rect/RectL.asm

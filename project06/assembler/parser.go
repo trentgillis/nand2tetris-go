@@ -14,16 +14,16 @@ const (
 )
 
 type Parser struct {
-	scanner            *bufio.Scanner
-	HasMoreLines       bool
-	currentInstruction string
+	scanner      *bufio.Scanner
+	HasMoreLines bool
+	currInst     string
 }
 
 func NewParser(f *os.File) Parser {
 	return Parser{
-		scanner:            bufio.NewScanner(f),
-		HasMoreLines:       true,
-		currentInstruction: "",
+		scanner:      bufio.NewScanner(f),
+		HasMoreLines: true,
+		currInst:     "",
 	}
 }
 
@@ -34,7 +34,7 @@ func (p *Parser) Advance() {
 			continue
 		}
 
-		p.currentInstruction = p.scanner.Text()
+		p.currInst = line
 		return
 	}
 
@@ -44,12 +44,12 @@ func (p *Parser) Advance() {
 	}
 }
 
-func (p *Parser) CurrentInstructionType() int {
-	if strings.HasPrefix(p.currentInstruction, "@") {
+func (p *Parser) CurrInstType() int {
+	if strings.HasPrefix(p.currInst, "@") {
 		return A_INSTRUCTION
 	}
 
-	if strings.HasPrefix(p.currentInstruction, "(") && strings.HasSuffix(p.currentInstruction, ")") {
+	if strings.HasPrefix(p.currInst, "(") && strings.HasSuffix(p.currInst, ")") {
 		return L_INSTRUCTION
 	}
 
@@ -57,6 +57,33 @@ func (p *Parser) CurrentInstructionType() int {
 }
 
 func (p *Parser) Symbol() string {
-	after, _ := strings.CutPrefix(p.currentInstruction, "@")
+	after, _ := strings.CutPrefix(p.currInst, "@")
 	return after
+}
+
+func (p *Parser) Dest() string {
+	if !strings.Contains(p.currInst, "=") {
+		return "null"
+	}
+	return strings.Split(p.currInst, "=")[0]
+}
+
+func (p *Parser) Comp() string {
+	comp := p.currInst
+	if strings.Contains(comp, "=") {
+		comp = strings.Split(comp, "=")[1]
+	}
+	if strings.Contains(comp, ";") {
+		comp = strings.Split(comp, ";")[0]
+	}
+
+	return comp
+}
+
+func (p *Parser) Jump() string {
+	if !strings.Contains(p.currInst, ";") {
+		return "null"
+	}
+
+	return strings.Split(p.currInst, ";")[1]
 }
