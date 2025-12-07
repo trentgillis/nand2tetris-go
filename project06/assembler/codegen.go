@@ -51,19 +51,15 @@ type CodeGen struct{}
 
 func (cg CodeGen) Dest(dest string) string {
 	bin := []rune{'0', '0', '0'}
-
 	if strings.Contains(dest, "A") {
 		bin[0] = '1'
 	}
-
 	if strings.Contains(dest, "D") {
 		bin[1] = '1'
 	}
-
 	if strings.Contains(dest, "M") {
 		bin[2] = '1'
 	}
-
 	return string(bin)
 }
 
@@ -72,7 +68,6 @@ func (cg CodeGen) Comp(comp string) string {
 	if !ok {
 		log.Fatal("codegen: Invalid comp passed to Comp()")
 	}
-
 	return bin
 }
 
@@ -81,6 +76,5 @@ func (cg CodeGen) Jump(jump string) string {
 	if !ok {
 		log.Fatal("codegen: Invalid jump passed to Jump()")
 	}
-
 	return bin
 }

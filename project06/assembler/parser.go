@@ -48,11 +48,9 @@ func (p *Parser) CurrInstType() int {
 	if strings.HasPrefix(p.currInst, "@") {
 		return A_INSTRUCTION
 	}
-
 	if strings.HasPrefix(p.currInst, "(") && strings.HasSuffix(p.currInst, ")") {
 		return L_INSTRUCTION
 	}
-
 	return C_INSTRUCTION
 }
 
