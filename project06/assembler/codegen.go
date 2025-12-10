@@ -66,7 +66,7 @@ func (cg CodeGen) Dest(dest string) string {
 func (cg CodeGen) Comp(comp string) string {
 	bin, ok := compMapping[comp]
 	if !ok {
-		log.Fatal("codegen: Invalid comp passed to Comp()")
+		log.Fatal("codegen: Invalid comp value passed to Comp()")
 	}
 	return bin
 }
@@ -74,7 +74,7 @@ func (cg CodeGen) Comp(comp string) string {
 func (cg CodeGen) Jump(jump string) string {
 	bin, ok := jumpMapping[jump]
 	if !ok {
-		log.Fatal("codegen: Invalid jump passed to Jump()")
+		log.Fatal("codegen: Invalid jump value passed to Jump()")
 	}
 	return bin
 }

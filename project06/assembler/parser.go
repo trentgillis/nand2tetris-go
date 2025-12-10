@@ -14,15 +14,15 @@ const (
 )
 
 type Parser struct {
-	scanner      *bufio.Scanner
 	HasMoreLines bool
+	scanner      *bufio.Scanner
 	currInst     string
 }
 
 func NewParser(f *os.File) Parser {
 	return Parser{
-		scanner:      bufio.NewScanner(f),
 		HasMoreLines: true,
+		scanner:      bufio.NewScanner(f),
 		currInst:     "",
 	}
 }
@@ -81,7 +81,6 @@ func (p *Parser) Comp() string {
 	if strings.Contains(comp, ";") {
 		comp = strings.Split(comp, ";")[0]
 	}
-
 	return comp
 }
 
@@ -89,6 +88,5 @@ func (p *Parser) Jump() string {
 	if !strings.Contains(p.currInst, ";") {
 		return "null"
 	}
-
 	return strings.Split(p.currInst, ";")[1]
 }
