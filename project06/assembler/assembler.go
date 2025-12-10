@@ -62,8 +62,6 @@ func (a Assembler) GenerateLAddrs() {
 		switch parser.CurrInstType() {
 		case L_INSTRUCTION:
 			symbol := parser.Symbol()
-			fmt.Println(symbol)
-			fmt.Println(lineNum)
 			a.processLInstruction(symbol, lineNum)
 		case A_INSTRUCTION:
 			lineNum += 1
@@ -75,7 +73,6 @@ func (a Assembler) GenerateLAddrs() {
 	}
 
 	a.infile.Seek(0, 0)
-	fmt.Println(a.st)
 }
 
 func (a Assembler) writeAInst(symbol string) {
