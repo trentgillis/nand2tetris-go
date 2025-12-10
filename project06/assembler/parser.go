@@ -61,7 +61,7 @@ func (p *Parser) Symbol() string {
 	}
 	if strings.HasPrefix(p.currInst, "(") {
 		after, _ = strings.CutPrefix(p.currInst, "(")
-		after, _ = strings.CutPrefix(after, ")")
+		after, _ = strings.CutSuffix(after, ")")
 	}
 	return after
 }

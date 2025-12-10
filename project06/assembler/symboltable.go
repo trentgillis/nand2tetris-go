@@ -36,13 +36,8 @@ func NewSymbolTable() SymbolTable {
 	}
 }
 
-func (st *SymbolTable) GetAddr(symbol string) int {
-	addr, ok := st.symbols[symbol]
-	if !ok {
-		addr = st.AddEntry(symbol)
-	}
-
-	return addr
+func (st SymbolTable) GetAddr(symbol string) int {
+	return st.symbols[symbol]
 }
 
 func (st *SymbolTable) Contains(symbol string) bool {
@@ -50,7 +45,12 @@ func (st *SymbolTable) Contains(symbol string) bool {
 	return ok
 }
 
-func (st *SymbolTable) AddEntry(symbol string) int {
+func (st *SymbolTable) AddEntry(symbol string, addr int) int {
+	st.symbols[symbol] = addr
+	return addr
+}
+
+func (st *SymbolTable) AddVar(symbol string) int {
 	st.symbols[symbol] = st.currAddr
 	st.currAddr += 1
 	return st.currAddr

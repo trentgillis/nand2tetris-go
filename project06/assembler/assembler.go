@@ -9,14 +9,13 @@ import (
 )
 
 type Assembler struct {
+	infile  *os.File
 	outfile *os.File
-	parser  Parser
 	codegen CodeGen
 	st      SymbolTable
 }
 
 func New(f *os.File) Assembler {
-	p := NewParser(f)
 	c := CodeGen{}
 	st := NewSymbolTable()
 
@@ -26,35 +25,66 @@ func New(f *os.File) Assembler {
 	}
 
 	return Assembler{
+		infile:  f,
 		outfile: outfile,
-		parser:  p,
 		codegen: c,
 		st:      st,
 	}
 }
 
 func (a Assembler) Assemble() {
-	a.parser.Advance()
-	for a.parser.HasMoreLines {
-		switch a.parser.CurrInstType() {
+	a.GenerateLAddrs()
+
+	parser := NewParser(a.infile)
+	parser.Advance()
+	for parser.HasMoreLines {
+		switch parser.CurrInstType() {
 		case A_INSTRUCTION:
-			a.writeAInst()
+			symbol := parser.Symbol()
+			a.writeAInst(symbol)
 		case C_INSTRUCTION:
-			a.writeCInst()
-		case L_INSTRUCTION:
-			a.writeLInst()
+			dest := parser.Dest()
+			comp := parser.Comp()
+			jump := parser.Jump()
+			a.writeCInst(dest, comp, jump)
 		}
 
-		a.parser.Advance()
+		parser.Advance()
 	}
 }
 
-func (a Assembler) writeAInst() {
-	symbol := a.parser.Symbol()
+func (a Assembler) GenerateLAddrs() {
+	lineNum := 0
+	parser := NewParser(a.infile)
 
+	parser.Advance()
+	for parser.HasMoreLines {
+		switch parser.CurrInstType() {
+		case L_INSTRUCTION:
+			symbol := parser.Symbol()
+			fmt.Println(symbol)
+			fmt.Println(lineNum)
+			a.processLInstruction(symbol, lineNum)
+		case A_INSTRUCTION:
+			lineNum += 1
+		case C_INSTRUCTION:
+			lineNum += 1
+		}
+
+		parser.Advance()
+	}
+
+	a.infile.Seek(0, 0)
+	fmt.Println(a.st)
+}
+
+func (a Assembler) writeAInst(symbol string) {
 	var value int64
 	value, err := strconv.ParseInt(symbol, 10, 16)
 	if err != nil {
+		if !a.st.Contains(symbol) {
+			a.st.AddVar(symbol)
+		}
 		symbolAddr := a.st.GetAddr(symbol)
 		binStr := padZeros(fmt.Sprintf("%b", symbolAddr))
 		fmt.Fprintf(a.outfile, "%s\n", binStr)
@@ -65,23 +95,19 @@ func (a Assembler) writeAInst() {
 	fmt.Fprintf(a.outfile, "%s\n", binStr)
 }
 
-func (a Assembler) writeCInst() {
-	dest := a.parser.Dest()
-	comp := a.parser.Comp()
-	jump := a.parser.Jump()
+func (a Assembler) writeCInst(dest string, comp string, jump string) {
 	aBit := "0"
 	if strings.Contains(comp, "M") {
 		aBit = "1"
 	}
-
 	fmt.Fprintf(a.outfile, "111%s%s%s%s\n", aBit, a.codegen.Comp(comp), a.codegen.Dest(dest), a.codegen.Jump(jump))
 }
 
-func (a Assembler) writeLInst() {
-	symbol := a.parser.Symbol()
-	if !a.st.Contains(symbol) {
-		a.st.AddEntry(symbol)
+func (a Assembler) processLInstruction(symbol string, lineNum int) {
+	if a.st.Contains(symbol) {
+		return
 	}
+	a.st.AddEntry(symbol, lineNum)
 }
 
 func padZeros(binStr string) string {
