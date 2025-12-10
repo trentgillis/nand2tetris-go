@@ -55,7 +55,14 @@ func (p *Parser) CurrInstType() int {
 }
 
 func (p *Parser) Symbol() string {
-	after, _ := strings.CutPrefix(p.currInst, "@")
+	var after string
+	if strings.HasPrefix(p.currInst, "@") {
+		after, _ = strings.CutPrefix(p.currInst, "@")
+	}
+	if strings.HasPrefix(p.currInst, "(") {
+		after, _ = strings.CutPrefix(p.currInst, "(")
+		after, _ = strings.CutPrefix(after, ")")
+	}
 	return after
 }
 

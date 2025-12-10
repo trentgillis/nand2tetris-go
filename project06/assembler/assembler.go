@@ -12,11 +12,13 @@ type Assembler struct {
 	outfile *os.File
 	parser  Parser
 	codegen CodeGen
+	st      SymbolTable
 }
 
 func New(f *os.File) Assembler {
 	p := NewParser(f)
 	c := CodeGen{}
+	st := NewSymbolTable()
 
 	outfile, err := os.Create(strings.Replace(f.Name(), ".asm", ".hack", 1))
 	if err != nil {
@@ -27,6 +29,7 @@ func New(f *os.File) Assembler {
 		outfile: outfile,
 		parser:  p,
 		codegen: c,
+		st:      st,
 	}
 }
 
@@ -52,8 +55,10 @@ func (a Assembler) writeAInst() {
 	var value int64
 	value, err := strconv.ParseInt(symbol, 10, 16)
 	if err != nil {
-		// TODO: symbol table lookup
-		log.Fatal(err)
+		symbolAddr := a.st.GetAddr(symbol)
+		binStr := padZeros(fmt.Sprintf("%b", symbolAddr))
+		fmt.Fprintf(a.outfile, "%s\n", binStr)
+		return
 	}
 
 	binStr := padZeros(fmt.Sprintf("%b", value))
@@ -73,7 +78,10 @@ func (a Assembler) writeCInst() {
 }
 
 func (a Assembler) writeLInst() {
-	a.outfile.WriteString("TODO\n")
+	symbol := a.parser.Symbol()
+	if !a.st.Contains(symbol) {
+		a.st.AddEntry(symbol)
+	}
 }
 
 func padZeros(binStr string) string {
