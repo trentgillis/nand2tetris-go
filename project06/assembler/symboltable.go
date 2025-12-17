@@ -40,7 +40,7 @@ func (st SymbolTable) GetAddr(symbol string) int {
 	return st.symbols[symbol]
 }
 
-func (st *SymbolTable) Contains(symbol string) bool {
+func (st SymbolTable) Contains(symbol string) bool {
 	_, ok := st.symbols[symbol]
 	return ok
 }

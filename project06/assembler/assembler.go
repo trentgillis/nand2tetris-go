@@ -15,7 +15,7 @@ type Assembler struct {
 	symtable SymbolTable
 }
 
-func New(f *os.File) Assembler {
+func New(f *os.File) *Assembler {
 	codegen := CodeGen{}
 	symtable := NewSymbolTable()
 
@@ -24,7 +24,7 @@ func New(f *os.File) Assembler {
 		log.Fatal(err)
 	}
 
-	return Assembler{
+	return &Assembler{
 		infile:   f,
 		outfile:  outfile,
 		codegen:  codegen,
@@ -32,7 +32,7 @@ func New(f *os.File) Assembler {
 	}
 }
 
-func (a Assembler) Assemble() {
+func (a *Assembler) Assemble() {
 	// Performs first pass of the input file, adding L instruction symbols to the
 	// symbol table
 	a.populateLAddrs()
@@ -54,7 +54,7 @@ func (a Assembler) Assemble() {
 	}
 }
 
-func (a Assembler) populateLAddrs() {
+func (a *Assembler) populateLAddrs() {
 	lineNum := 0
 	parser := NewParser(a.infile)
 
@@ -75,7 +75,7 @@ func (a Assembler) populateLAddrs() {
 	a.infile.Seek(0, 0)
 }
 
-func (a Assembler) processAInst(symbol string) {
+func (a *Assembler) processAInst(symbol string) {
 	value, err := strconv.ParseInt(symbol, 10, 16)
 	if err != nil {
 		if !a.symtable.Contains(symbol) {
@@ -88,7 +88,7 @@ func (a Assembler) processAInst(symbol string) {
 	fmt.Fprintf(a.outfile, "%s\n", binStr)
 }
 
-func (a Assembler) processCInst(dest string, comp string, jump string) {
+func (a *Assembler) processCInst(dest string, comp string, jump string) {
 	aBit := "0"
 	if strings.Contains(comp, "M") {
 		aBit = "1"
@@ -96,7 +96,7 @@ func (a Assembler) processCInst(dest string, comp string, jump string) {
 	fmt.Fprintf(a.outfile, "111%s%s%s%s\n", aBit, a.codegen.Comp(comp), a.codegen.Dest(dest), a.codegen.Jump(jump))
 }
 
-func (a Assembler) processLInst(symbol string, lineNum int) {
+func (a *Assembler) processLInst(symbol string, lineNum int) {
 	if a.symtable.Contains(symbol) {
 		return
 	}
