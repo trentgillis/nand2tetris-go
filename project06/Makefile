@@ -14,6 +14,9 @@ build: clean vet
 clean:
 	go clean
 
+test:
+	go test -v ./...
+
 run: build
 	./hackassembler ./asm/add/Add.asm
 	./hackassembler ./asm/max/Max.asm
