@@ -52,6 +52,8 @@ func (cw *codeWriter) writePush(segment string, index string) {
 	switch segment {
 	case "constant":
 		cw.writePushConstant(index)
+	case "static":
+		cw.writePushStatic(index)
 	case "local", "argument", "this", "that":
 		cw.writePushSegment(segment, index)
 	case "temp":
@@ -63,6 +65,8 @@ func (cw *codeWriter) writePush(segment string, index string) {
 
 func (cw *codeWriter) writePop(segment string, index string) {
 	switch segment {
+	case "static":
+		cw.writePopStatic(index)
 	case "local", "argument", "this", "that":
 		cw.writePopSegment(segment, index)
 	case "temp":
@@ -120,6 +124,19 @@ func (cw *codeWriter) writePushSegment(segment string, index string) {
 	cw.incrementSp()
 }
 
+func (cw *codeWriter) writePushStatic(index string) {
+	cw.numLabels += 1
+	fmt.Fprintf(cw.strBuilder, "@%s.%d\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("D=M\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("A=D+A\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
 func (cw *codeWriter) writePushTemp(index string) {
 	cw.strBuilder.WriteString("@5\n")
 	cw.strBuilder.WriteString("D=A\n")
@@ -148,6 +165,24 @@ func (cw *codeWriter) writePopSegment(segment string, index string) {
 	memVar, _ := cw.segmentMappings[segment]
 
 	fmt.Fprintf(cw.strBuilder, "@%s\n", memVar)
+	cw.strBuilder.WriteString("D=M\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("D=D+A\n")
+	cw.strBuilder.WriteString("@R15\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.decrementSp()
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R15\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+}
+
+func (cw *codeWriter) writePopStatic(index string) {
+	cw.numLabels += 1
+
+	fmt.Fprintf(cw.strBuilder, "@%s.%d\n", cw.fname, cw.numLabels)
 	cw.strBuilder.WriteString("D=M\n")
 	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
 	cw.strBuilder.WriteString("D=D+A\n")
