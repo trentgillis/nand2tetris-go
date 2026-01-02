@@ -1,7 +1,6 @@
 package vmtranslator
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -16,12 +15,10 @@ type vmTranslator struct {
 
 func Translate(f *os.File) {
 	vmt := newVmTranslator(f)
+	defer vmt.asmFile.Close()
 
 	vmt.parser.Advance()
-	for vmt.parser.HasMoreLines {
-		// TODO: remove when complete; used to debug generated asm in asm output files
-		fmt.Fprintf(vmt.asmFile, "// %s\n", vmt.parser.currLine)
-
+	for vmt.parser.hasMoreLines {
 		vmt.codeWriter.write(vmt.parser.commandType(), vmt.parser.arg1(), vmt.parser.arg2())
 		vmt.parser.Advance()
 	}

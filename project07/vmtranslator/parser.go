@@ -19,7 +19,7 @@ const (
 )
 
 type parser struct {
-	HasMoreLines bool
+	hasMoreLines bool
 	currLine     string
 	scanner      *bufio.Scanner
 }
@@ -27,7 +27,7 @@ type parser struct {
 func newParser(file *os.File) parser {
 	scanner := bufio.NewScanner(file)
 	return parser{
-		HasMoreLines: true,
+		hasMoreLines: true,
 		scanner:      scanner,
 	}
 }
@@ -35,7 +35,10 @@ func newParser(file *os.File) parser {
 func (p *parser) Advance() {
 	for p.scanner.Scan() {
 		line := strings.TrimSpace(p.scanner.Text())
-		if len(line) == 0 || strings.HasPrefix(line, "//") {
+		if idx := strings.Index(line, "//"); idx != -1 {
+			continue
+		}
+		if len(line) == 0 {
 			continue
 		}
 
@@ -43,7 +46,7 @@ func (p *parser) Advance() {
 		return
 	}
 
-	p.HasMoreLines = false
+	p.hasMoreLines = false
 	if err := p.scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
@@ -58,7 +61,8 @@ func (p *parser) commandType() int {
 	case "pop":
 		return c_pop
 	default:
-		return 0
+		log.Fatal("Invalid command")
+		return -1
 	}
 }
 

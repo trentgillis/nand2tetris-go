@@ -14,7 +14,7 @@ func main() {
 
 	filename := os.Args[1]
 	if filepath.Ext(filename) != ".vm" {
-		log.Fatal("Input file have the .asm extension")
+		log.Fatal("Input file have the .vm extension")
 	}
 
 	f, err := os.Open(filename)
