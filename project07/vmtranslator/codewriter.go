@@ -8,20 +8,30 @@ import (
 )
 
 type codeWriter struct {
-	outfile    *os.File
-	fname      string
-	strBuilder *strings.Builder
-	numLabels  int
+	outfile         *os.File
+	fname           string
+	strBuilder      *strings.Builder
+	numLabels       int
+	segmentMappings map[string]string
 }
 
 func newCodeWriter(outfile *os.File) codeWriter {
+	segmentMappings := map[string]string{
+		"local":    "LCL",
+		"argument": "ARG",
+		"this":     "THIS",
+		"that":     "THAT",
+	}
+
 	var b strings.Builder
 	fname, _ := strings.CutSuffix(filepath.Base(outfile.Name()), ".asm")
+
 	return codeWriter{
-		outfile:    outfile,
-		fname:      fname,
-		strBuilder: &b,
-		numLabels:  0,
+		outfile:         outfile,
+		fname:           fname,
+		strBuilder:      &b,
+		numLabels:       0,
+		segmentMappings: segmentMappings,
 	}
 }
 
@@ -42,29 +52,23 @@ func (cw *codeWriter) writePush(segment string, index string) {
 	switch segment {
 	case "constant":
 		cw.writePushConstant(index)
-	case "argument":
-		cw.writePushArgument(index)
-	case "this":
-		cw.writePushThis(index)
-	case "that":
-		cw.writePushThat(index)
+	case "local", "argument", "this", "that":
+		cw.writePushSegment(segment, index)
 	case "temp":
 		cw.writePushTemp(index)
+	case "pointer":
+		cw.writePushPointer(index)
 	}
 }
 
 func (cw *codeWriter) writePop(segment string, index string) {
 	switch segment {
-	case "local":
-		cw.writePopLocal(index)
-	case "argument":
-		cw.writePopArgument(index)
-	case "this":
-		cw.writePopThis(index)
-	case "that":
-		cw.writePopThat(index)
+	case "local", "argument", "this", "that":
+		cw.writePopSegment(segment, index)
 	case "temp":
 		cw.writePopTemp(index)
+	case "pointer":
+		cw.writePopPointer(index)
 	case "register":
 		cw.writePopReg(index)
 	}
@@ -102,36 +106,14 @@ func (cw *codeWriter) writePushConstant(index string) {
 	cw.incrementSp()
 }
 
-func (cw *codeWriter) writePushLocal(index string) {
-	cw.strBuilder.WriteString("@LCL\n")
-	cw.strBuilder.WriteString("@D=M\n")
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M\n")
-	cw.strBuilder.WriteString("M=D\n")
-	cw.incrementSp()
-}
+func (cw *codeWriter) writePushSegment(segment string, index string) {
+	memVar, _ := cw.segmentMappings[segment]
 
-func (cw *codeWriter) writePushArgument(index string) {
-	cw.strBuilder.WriteString("@ARG\n")
-	cw.strBuilder.WriteString("@D=M\n")
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M\n")
-	cw.strBuilder.WriteString("M=D\n")
-	cw.incrementSp()
-}
-
-func (cw *codeWriter) writePushThis(index string) {
-	cw.strBuilder.WriteString("@THIS\n")
-	cw.strBuilder.WriteString("@D=M\n")
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M\n")
-	cw.strBuilder.WriteString("M=D\n")
-	cw.incrementSp()
-}
-
-func (cw *codeWriter) writePushThat(index string) {
-	cw.strBuilder.WriteString("@THAT\n")
-	cw.strBuilder.WriteString("@D=M\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", memVar)
+	cw.strBuilder.WriteString("D=M\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("A=D+A\n")
+	cw.strBuilder.WriteString("D=M\n")
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("M=D\n")
@@ -139,69 +121,34 @@ func (cw *codeWriter) writePushThat(index string) {
 }
 
 func (cw *codeWriter) writePushTemp(index string) {
-	cw.strBuilder.WriteString("@TEMP\n")
-	cw.strBuilder.WriteString("@D=M\n")
+	cw.strBuilder.WriteString("@5\n")
+	cw.strBuilder.WriteString("D=A\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("A=D+A\n")
+	cw.strBuilder.WriteString("D=M\n")
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("M=D\n")
 	cw.incrementSp()
 }
 
-func (cw *codeWriter) writePopLocal(index string) {
-	cw.decrementSp()
-	cw.strBuilder.WriteString("@LCL\n")
-	cw.strBuilder.WriteString("D=M\n")
-	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
-	cw.strBuilder.WriteString("D=D+A\n")
-	cw.strBuilder.WriteString("@R15")
-	cw.strBuilder.WriteString("M=D\n")
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M\n")
-	cw.strBuilder.WriteString("D=M\n")
-	cw.strBuilder.WriteString("@R15\n")
-	cw.strBuilder.WriteString("A=M\n")
-	cw.strBuilder.WriteString("M=D\n")
+func (cw *codeWriter) writePushPointer(index string) {
+	if index == "0" {
+		cw.writePushSegment("this", index)
+	}
+	cw.writePushSegment("that", index)
 }
 
-func (cw *codeWriter) writePopArgument(index string) {
-	cw.decrementSp()
-	cw.strBuilder.WriteString("@ARG\n")
-	cw.strBuilder.WriteString("D=M\n")
-	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
-	cw.strBuilder.WriteString("D=D+A\n")
-	cw.strBuilder.WriteString("@R15")
-	cw.strBuilder.WriteString("M=D\n")
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M\n")
-	cw.strBuilder.WriteString("D=M\n")
-	cw.strBuilder.WriteString("@R15\n")
-	cw.strBuilder.WriteString("A=M\n")
-	cw.strBuilder.WriteString("M=D\n")
-}
+func (cw *codeWriter) writePopSegment(segment string, index string) {
+	memVar, _ := cw.segmentMappings[segment]
 
-func (cw *codeWriter) writePopThis(index string) {
-	cw.decrementSp()
-	cw.strBuilder.WriteString("@THIS\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", memVar)
 	cw.strBuilder.WriteString("D=M\n")
 	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
 	cw.strBuilder.WriteString("D=D+A\n")
-	cw.strBuilder.WriteString("@R15")
-	cw.strBuilder.WriteString("M=D\n")
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M\n")
-	cw.strBuilder.WriteString("D=M\n")
 	cw.strBuilder.WriteString("@R15\n")
-	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("M=D\n")
-}
-func (cw *codeWriter) writePopThat(index string) {
 	cw.decrementSp()
-	cw.strBuilder.WriteString("@THAT\n")
-	cw.strBuilder.WriteString("D=M\n")
-	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
-	cw.strBuilder.WriteString("D=D+A\n")
-	cw.strBuilder.WriteString("@R15")
-	cw.strBuilder.WriteString("M=D\n")
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("D=M\n")
@@ -211,13 +158,13 @@ func (cw *codeWriter) writePopThat(index string) {
 }
 
 func (cw *codeWriter) writePopTemp(index string) {
-	cw.decrementSp()
-	cw.strBuilder.WriteString("@TEMP\n")
-	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@5\n")
+	cw.strBuilder.WriteString("D=A\n")
 	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
 	cw.strBuilder.WriteString("D=D+A\n")
-	cw.strBuilder.WriteString("@R15")
+	cw.strBuilder.WriteString("@R15\n")
 	cw.strBuilder.WriteString("M=D\n")
+	cw.decrementSp()
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("D=M\n")
@@ -233,6 +180,13 @@ func (cw *codeWriter) writePopReg(index string) {
 	cw.strBuilder.WriteString("D=M\n")
 	fmt.Fprintf(cw.strBuilder, "@R%s\n", index)
 	cw.strBuilder.WriteString("M=D\n")
+}
+
+func (cw *codeWriter) writePopPointer(index string) {
+	if index == "0" {
+		cw.writePopSegment("this", index)
+	}
+	cw.writePopSegment("that", index)
 }
 
 func (cw *codeWriter) writeAdd() {
