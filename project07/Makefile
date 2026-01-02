@@ -19,3 +19,4 @@ test:
 
 run: build
 	./jackvmt ./vm/StackArithmetic/SimpleAdd/SimpleAdd.vm
+	./jackvmt ./vm/StackArithmetic/StackTest/StackTest.vm

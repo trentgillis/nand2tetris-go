@@ -3,81 +3,124 @@ package vmtranslator
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
 type codeWriter struct {
-	outfile *os.File
+	outfile    *os.File
+	fname      string
+	strBuilder *strings.Builder
+	numLabels  int
 }
 
 func newCodeWriter(outfile *os.File) codeWriter {
+	var b strings.Builder
+	fname, _ := strings.CutSuffix(filepath.Base(outfile.Name()), ".asm")
 	return codeWriter{
-		outfile: outfile,
+		outfile:    outfile,
+		fname:      fname,
+		strBuilder: &b,
+		numLabels:  0,
 	}
 }
 
 func (cw *codeWriter) write(commandType int, arg1 string, arg2 string) {
-	var b strings.Builder
+	cw.strBuilder.Reset()
 	switch commandType {
 	case c_push:
-		writePush(&b, arg1, arg2)
+		cw.writePush(arg1, arg2)
 	case c_pop:
-		writePop(&b, arg1, arg2)
+		cw.writePop(arg1, arg2)
 	case c_arithmetic:
-		writeArithmetic(&b, arg1)
+		cw.writeArithmetic(arg1)
 	}
-	cw.outfile.WriteString(b.String())
+	cw.outfile.WriteString(cw.strBuilder.String())
 }
 
-func writePush(b *strings.Builder, segment string, index string) {
+func (cw *codeWriter) writePush(segment string, index string) {
 	switch segment {
 	case "constant":
-		writePushConstant(b, index)
+		cw.writePushConstant(index)
 	}
-
-	b.WriteString("@SP\n")
-	b.WriteString("A=M\n")
-	b.WriteString("M=D\n")
-	b.WriteString("@SP\n")
-	b.WriteString("M=M+1\n")
 }
 
-func writePushConstant(b *strings.Builder, index string) {
-	fmt.Fprintf(b, "@%s\n", index)
-	b.WriteString("D=A\n")
-}
-
-func writePop(b *strings.Builder, segment string, index string) {
-	b.WriteString("@SP\n")
-	b.WriteString("M=M-1\n")
-
+func (cw *codeWriter) writePop(segment string, index string) {
 	switch segment {
 	case "register":
-		writePopReg(b, index)
+		cw.writePopReg(index)
 	}
 }
 
-func writePopReg(b *strings.Builder, index string) {
-	b.WriteString("@SP\n")
-	b.WriteString("A=M\n")
-	b.WriteString("D=M\n")
-	fmt.Fprintf(b, "@R%s\n", index)
-	b.WriteString("M=D\n")
-}
-
-func writeArithmetic(b *strings.Builder, command string) {
+func (cw *codeWriter) writeArithmetic(command string) {
 	switch command {
 	case "add":
-		writeAdd(b)
+		cw.writeAdd()
+	case "eq":
+		cw.writeEq()
 	}
 }
 
-func writeAdd(b *strings.Builder) {
-	writePop(b, "register", "13")
-	writePop(b, "register", "14")
-	b.WriteString("@R13\n")
-	b.WriteString("D=M\n")
-	b.WriteString("@R14\n")
-	b.WriteString("D=D+M\n")
-	writePush(b, "", "")
+func (cw *codeWriter) writePushConstant(index string) {
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("D=A\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writePopReg(index string) {
+	cw.decrementSp()
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("D=M\n")
+	fmt.Fprintf(cw.strBuilder, "@R%s\n", index)
+	cw.strBuilder.WriteString("M=D\n")
+}
+
+func (cw *codeWriter) writeAdd() {
+	cw.writePop("register", "13")
+	cw.writePop("register", "14")
+	cw.strBuilder.WriteString("@R13\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R14\n")
+	cw.strBuilder.WriteString("D=D+M\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writeEq() {
+	cw.numLabels += 1
+
+	cw.writePop("register", "13")
+	cw.writePop("register", "14")
+	cw.strBuilder.WriteString("@R13\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R14\n")
+	cw.strBuilder.WriteString("D=D-M\n")
+	fmt.Fprintf(cw.strBuilder, "@%s.EQ.%d\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("D;JEQ\n")
+	fmt.Fprintf(cw.strBuilder, "@%s.NE.%d\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("D;JNE\n")
+	fmt.Fprintf(cw.strBuilder, "(%s.EQ.%d)\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("D=-1\n")
+	fmt.Fprintf(cw.strBuilder, "@%s.EQ_END.%d\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("0;JEQ\n")
+	fmt.Fprintf(cw.strBuilder, "(%s.NE.%d)\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("D=0\n")
+	fmt.Fprintf(cw.strBuilder, "(%s.EQ_END.%d)\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) incrementSp() {
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M+1\n")
+}
+
+func (cw *codeWriter) decrementSp() {
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M-1\n")
 }
