@@ -8,31 +8,31 @@ import (
 )
 
 const (
-	C_ARITHMETIC = iota
-	C_PUSH
-	C_POP
-	C_LABEL
-	C_GOTO
-	C_IF
-	C_FUNCTION
-	C_CALL
+	c_arithmetic = iota
+	c_push
+	c_pop
+	c_label
+	c_goto
+	c_if
+	c_function
+	c_call
 )
 
-type Parser struct {
+type parser struct {
 	HasMoreLines bool
 	currLine     string
 	scanner      *bufio.Scanner
 }
 
-func NewParser(file *os.File) Parser {
+func newParser(file *os.File) parser {
 	scanner := bufio.NewScanner(file)
-	return Parser{
+	return parser{
 		HasMoreLines: true,
 		scanner:      scanner,
 	}
 }
 
-func (p *Parser) Advance() {
+func (p *parser) Advance() {
 	for p.scanner.Scan() {
 		line := strings.TrimSpace(p.scanner.Text())
 		if len(line) == 0 || strings.HasPrefix(line, "//") {
@@ -49,20 +49,20 @@ func (p *Parser) Advance() {
 	}
 }
 
-func (p *Parser) CommandType() int {
+func (p *parser) commandType() int {
 	switch cmd := strings.Split(p.currLine, " ")[0]; cmd {
 	case "add", "sub", "neg", "eq", "gt", "lt", "and", "or", "not":
-		return C_ARITHMETIC
+		return c_arithmetic
 	case "push":
-		return C_PUSH
+		return c_push
 	case "pop":
-		return C_POP
+		return c_pop
 	default:
 		return 0
 	}
 }
 
-func (p *Parser) Arg1() string {
+func (p *parser) arg1() string {
 	parts := strings.Split(p.currLine, " ")
 	if len(parts) < 2 {
 		return ""
@@ -70,7 +70,7 @@ func (p *Parser) Arg1() string {
 	return parts[1]
 }
 
-func (p *Parser) Arg2() string {
+func (p *parser) arg2() string {
 	parts := strings.Split(p.currLine, " ")
 	if len(parts) < 3 {
 		return ""

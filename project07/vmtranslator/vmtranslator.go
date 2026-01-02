@@ -10,7 +10,7 @@ import (
 type vmTranslator struct {
 	vmFile     *os.File
 	asmFile    *os.File
-	parser     Parser
+	parser     parser
 	codeWriter codeWriter
 }
 
@@ -22,7 +22,7 @@ func Translate(f *os.File) {
 		// TODO: remove when complete; used to debug generated asm in asm output files
 		fmt.Fprintf(vmt.asmFile, "// %s\n", vmt.parser.currLine)
 
-		vmt.codeWriter.write(vmt.parser.CommandType(), vmt.parser.Arg1(), vmt.parser.Arg2())
+		vmt.codeWriter.write(vmt.parser.commandType(), vmt.parser.arg1(), vmt.parser.arg2())
 		vmt.parser.Advance()
 	}
 }
@@ -33,7 +33,7 @@ func newVmTranslator(f *os.File) vmTranslator {
 		log.Fatalf("vmtranslator.New: %e\n", err)
 	}
 
-	parser := NewParser(f)
+	parser := newParser(f)
 	codeWriter := newCodeWriter(asmFile)
 
 	return vmTranslator{
