@@ -1,3 +1,6 @@
-Arg1(): constant, Arg2(): 7, CommandType(): 1
-Arg1(): constant, Arg2(): 8, CommandType(): 1
-Arg1(): , Arg2(): , CommandType(): 0
+// push constant 7
+ctype: 1, arg1: constant, arg2: 7
+// push constant 8
+ctype: 1, arg1: constant, arg2: 8
+// add
+ctype: 0, arg1: , arg2: 

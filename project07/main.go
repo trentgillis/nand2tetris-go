@@ -23,5 +23,5 @@ func main() {
 	}
 	defer f.Close()
 
-	vmtranslator.New(f).Translate()
+	vmtranslator.Translate(f)
 }
