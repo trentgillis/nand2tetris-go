@@ -32,7 +32,7 @@ M=D
 @R13
 D=M
 @R14
-D=D+M
+D=M+D
 @SP
 A=M
 M=D

@@ -56,14 +56,31 @@ func (cw *codeWriter) writeArithmetic(command string) {
 	switch command {
 	case "add":
 		cw.writeAdd()
+	case "sub":
+		cw.writeSub()
+	case "neg":
+		cw.writeNeg()
+	case "and":
+		cw.writeAnd()
+	case "or":
+		cw.writeOr()
+	case "not":
+		cw.writeNot()
 	case "eq":
 		cw.writeEq()
+	case "gt":
+		cw.writeGt()
+	case "lt":
+		cw.writeLt()
 	}
 }
 
 func (cw *codeWriter) writePushConstant(index string) {
 	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
 	cw.strBuilder.WriteString("D=A\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
 	cw.incrementSp()
 }
 
@@ -82,7 +99,69 @@ func (cw *codeWriter) writeAdd() {
 	cw.strBuilder.WriteString("@R13\n")
 	cw.strBuilder.WriteString("D=M\n")
 	cw.strBuilder.WriteString("@R14\n")
-	cw.strBuilder.WriteString("D=D+M\n")
+	cw.strBuilder.WriteString("D=M+D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writeSub() {
+	cw.writePop("register", "13")
+	cw.writePop("register", "14")
+	cw.strBuilder.WriteString("@R13\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R14\n")
+	cw.strBuilder.WriteString("D=M-D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writeNeg() {
+	cw.writePop("register", "13")
+	cw.strBuilder.WriteString("@R13\n")
+	cw.strBuilder.WriteString("D=-M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writeAnd() {
+	cw.writePop("register", "13")
+	cw.writePop("register", "14")
+	cw.strBuilder.WriteString("@R13\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R14\n")
+	cw.strBuilder.WriteString("D=M&D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writeOr() {
+	cw.writePop("register", "13")
+	cw.writePop("register", "14")
+	cw.strBuilder.WriteString("@R13\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R14\n")
+	cw.strBuilder.WriteString("D=M|D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writeNot() {
+	cw.writePop("register", "13")
+	cw.strBuilder.WriteString("@R13\n")
+	cw.strBuilder.WriteString("D=!M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
 	cw.incrementSp()
 }
 
@@ -112,10 +191,59 @@ func (cw *codeWriter) writeEq() {
 	cw.incrementSp()
 }
 
-func (cw *codeWriter) incrementSp() {
+func (cw *codeWriter) writeLt() {
+	cw.numLabels += 1
+
+	cw.writePop("register", "13")
+	cw.writePop("register", "14")
+	cw.strBuilder.WriteString("@R13\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R14\n")
+	cw.strBuilder.WriteString("D=M-D\n")
+	fmt.Fprintf(cw.strBuilder, "@%s.LT.%d\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("D;JLT\n")
+	fmt.Fprintf(cw.strBuilder, "@%s.GTE.%d\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("0;JEQ\n")
+	fmt.Fprintf(cw.strBuilder, "(%s.LT.%d)\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("D=-1\n")
+	fmt.Fprintf(cw.strBuilder, "@%s.LT_END.%d\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("0;JEQ\n")
+	fmt.Fprintf(cw.strBuilder, "(%s.GTE.%d)\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("D=0\n")
+	fmt.Fprintf(cw.strBuilder, "(%s.LT_END.%d)\n", cw.fname, cw.numLabels)
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writeGt() {
+	cw.numLabels += 1
+
+	cw.writePop("register", "13")
+	cw.writePop("register", "14")
+	cw.strBuilder.WriteString("@R13\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R14\n")
+	cw.strBuilder.WriteString("D=M-D\n")
+	fmt.Fprintf(cw.strBuilder, "@%s.GT.%d\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("D;JGT\n")
+	fmt.Fprintf(cw.strBuilder, "@%s.LTE.%d\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("0;JEQ\n")
+	fmt.Fprintf(cw.strBuilder, "(%s.GT.%d)\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("D=-1\n")
+	fmt.Fprintf(cw.strBuilder, "@%s.GT_END.%d\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("0;JEQ\n")
+	fmt.Fprintf(cw.strBuilder, "(%s.LTE.%d)\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("D=0\n")
+	fmt.Fprintf(cw.strBuilder, "(%s.GT_END.%d)\n", cw.fname, cw.numLabels)
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) incrementSp() {
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("M=M+1\n")
 }
