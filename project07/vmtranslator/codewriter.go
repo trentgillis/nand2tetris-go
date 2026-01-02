@@ -133,10 +133,15 @@ func (cw *codeWriter) writePushTemp(index string) {
 }
 
 func (cw *codeWriter) writePushPointer(index string) {
-	if index == "0" {
-		cw.writePushSegment("this", index)
-	}
-	cw.writePushSegment("that", index)
+	cw.strBuilder.WriteString("@3\n")
+	cw.strBuilder.WriteString("D=A\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("A=D+A\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
 }
 
 func (cw *codeWriter) writePopSegment(segment string, index string) {
@@ -173,6 +178,22 @@ func (cw *codeWriter) writePopTemp(index string) {
 	cw.strBuilder.WriteString("M=D\n")
 }
 
+func (cw *codeWriter) writePopPointer(index string) {
+	cw.strBuilder.WriteString("@3\n")
+	cw.strBuilder.WriteString("D=A\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("D=D+A\n")
+	cw.strBuilder.WriteString("@R15\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.decrementSp()
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R15\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+}
+
 func (cw *codeWriter) writePopReg(index string) {
 	cw.decrementSp()
 	cw.strBuilder.WriteString("@SP\n")
@@ -180,13 +201,6 @@ func (cw *codeWriter) writePopReg(index string) {
 	cw.strBuilder.WriteString("D=M\n")
 	fmt.Fprintf(cw.strBuilder, "@R%s\n", index)
 	cw.strBuilder.WriteString("M=D\n")
-}
-
-func (cw *codeWriter) writePopPointer(index string) {
-	if index == "0" {
-		cw.writePopSegment("this", index)
-	}
-	cw.writePopSegment("that", index)
 }
 
 func (cw *codeWriter) writeAdd() {

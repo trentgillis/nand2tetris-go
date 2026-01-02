@@ -7,22 +7,8 @@ M=D
 @SP
 M=M+1
 // pop pointer 0
-@THIS
-D=M
-@0
-D=D+A
-@R15
-M=D
-@SP
-M=M-1
-@SP
-A=M
-D=M
-@R15
-A=M
-M=D
-@THAT
-D=M
+@3
+D=A
 @0
 D=D+A
 @R15
@@ -44,8 +30,8 @@ M=D
 @SP
 M=M+1
 // pop pointer 1
-@THAT
-D=M
+@3
+D=A
 @1
 D=D+A
 @R15
@@ -105,18 +91,8 @@ D=M
 A=M
 M=D
 // push pointer 0
-@THIS
-D=M
-@0
-A=D+A
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-@THAT
-D=M
+@3
+D=A
 @0
 A=D+A
 D=M
@@ -126,8 +102,8 @@ M=D
 @SP
 M=M+1
 // push pointer 1
-@THAT
-D=M
+@3
+D=A
 @1
 A=D+A
 D=M
