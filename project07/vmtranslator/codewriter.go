@@ -42,11 +42,29 @@ func (cw *codeWriter) writePush(segment string, index string) {
 	switch segment {
 	case "constant":
 		cw.writePushConstant(index)
+	case "argument":
+		cw.writePushArgument(index)
+	case "this":
+		cw.writePushThis(index)
+	case "that":
+		cw.writePushThat(index)
+	case "temp":
+		cw.writePushTemp(index)
 	}
 }
 
 func (cw *codeWriter) writePop(segment string, index string) {
 	switch segment {
+	case "local":
+		cw.writePopLocal(index)
+	case "argument":
+		cw.writePopArgument(index)
+	case "this":
+		cw.writePopThis(index)
+	case "that":
+		cw.writePopThat(index)
+	case "temp":
+		cw.writePopTemp(index)
 	case "register":
 		cw.writePopReg(index)
 	}
@@ -82,6 +100,130 @@ func (cw *codeWriter) writePushConstant(index string) {
 	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("M=D\n")
 	cw.incrementSp()
+}
+
+func (cw *codeWriter) writePushLocal(index string) {
+	cw.strBuilder.WriteString("@LCL\n")
+	cw.strBuilder.WriteString("@D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writePushArgument(index string) {
+	cw.strBuilder.WriteString("@ARG\n")
+	cw.strBuilder.WriteString("@D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writePushThis(index string) {
+	cw.strBuilder.WriteString("@THIS\n")
+	cw.strBuilder.WriteString("@D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writePushThat(index string) {
+	cw.strBuilder.WriteString("@THAT\n")
+	cw.strBuilder.WriteString("@D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writePushTemp(index string) {
+	cw.strBuilder.WriteString("@TEMP\n")
+	cw.strBuilder.WriteString("@D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.incrementSp()
+}
+
+func (cw *codeWriter) writePopLocal(index string) {
+	cw.decrementSp()
+	cw.strBuilder.WriteString("@LCL\n")
+	cw.strBuilder.WriteString("D=M\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("D=D+A\n")
+	cw.strBuilder.WriteString("@R15")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R15\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+}
+
+func (cw *codeWriter) writePopArgument(index string) {
+	cw.decrementSp()
+	cw.strBuilder.WriteString("@ARG\n")
+	cw.strBuilder.WriteString("D=M\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("D=D+A\n")
+	cw.strBuilder.WriteString("@R15")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R15\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+}
+
+func (cw *codeWriter) writePopThis(index string) {
+	cw.decrementSp()
+	cw.strBuilder.WriteString("@THIS\n")
+	cw.strBuilder.WriteString("D=M\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("D=D+A\n")
+	cw.strBuilder.WriteString("@R15")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R15\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+}
+func (cw *codeWriter) writePopThat(index string) {
+	cw.decrementSp()
+	cw.strBuilder.WriteString("@THAT\n")
+	cw.strBuilder.WriteString("D=M\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("D=D+A\n")
+	cw.strBuilder.WriteString("@R15")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R15\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+}
+
+func (cw *codeWriter) writePopTemp(index string) {
+	cw.decrementSp()
+	cw.strBuilder.WriteString("@TEMP\n")
+	cw.strBuilder.WriteString("D=M\n")
+	fmt.Fprintf(cw.strBuilder, "@%s\n", index)
+	cw.strBuilder.WriteString("D=D+A\n")
+	cw.strBuilder.WriteString("@R15")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@R15\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
 }
 
 func (cw *codeWriter) writePopReg(index string) {
