@@ -64,6 +64,9 @@ func (p *parser) commandType() int {
 
 func (p *parser) arg1() string {
 	parts := strings.Split(p.currLine, " ")
+	if len(parts) == 1 {
+		return parts[0]
+	}
 	if len(parts) < 2 {
 		return ""
 	}
