@@ -90,18 +90,10 @@ func (cw *codeWriter) writePop(segment string, index string) {
 
 func (cw *codeWriter) writeArithmetic(command string) {
 	switch command {
-	case "add":
-		cw.writeAdd()
-	case "sub":
-		cw.writeSub()
-	case "neg":
-		cw.writeNeg()
-	case "and":
-		cw.writeAnd()
-	case "or":
-		cw.writeOr()
-	case "not":
-		cw.writeNot()
+	case "add", "sub", "and", "or":
+		cw.writeTwoOpArithmetic(command)
+	case "neg", "not":
+		cw.writeOneOpArithmetic(command)
 	case "eq":
 		cw.writeEq()
 	case "gt":
@@ -227,48 +219,32 @@ func (cw *codeWriter) writePopPointer(index string) {
 	cw.strBuilder.WriteString("M=D\n")
 }
 
-func (cw *codeWriter) writeAdd() {
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("AM=M-1\n")
-	cw.strBuilder.WriteString("D=M\n")
-	cw.strBuilder.WriteString("A=A-1\n")
-	cw.strBuilder.WriteString("M=M+D\n")
-}
+func (cw *codeWriter) writeOneOpArithmetic(command string) {
+	opMap := map[string]string{
+		"neg": "-",
+		"not": "!",
+	}
+	op, _ := opMap[command]
 
-func (cw *codeWriter) writeSub() {
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("AM=M-1\n")
-	cw.strBuilder.WriteString("D=M\n")
-	cw.strBuilder.WriteString("A=A-1\n")
-	cw.strBuilder.WriteString("M=M-D\n")
-}
-
-func (cw *codeWriter) writeNeg() {
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M-1\n")
-	cw.strBuilder.WriteString("M=-M\n")
+	fmt.Fprintf(cw.strBuilder, "M=%sM\n", op)
 }
 
-func (cw *codeWriter) writeAnd() {
+func (cw *codeWriter) writeTwoOpArithmetic(command string) {
+	opMap := map[string]string{
+		"add": "+",
+		"sub": "-",
+		"and": "&",
+		"or":  "|",
+	}
+	op, _ := opMap[command]
+
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("AM=M-1\n")
 	cw.strBuilder.WriteString("D=M\n")
 	cw.strBuilder.WriteString("A=A-1\n")
-	cw.strBuilder.WriteString("M=M&D\n")
-}
-
-func (cw *codeWriter) writeOr() {
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("AM=M-1\n")
-	cw.strBuilder.WriteString("D=M\n")
-	cw.strBuilder.WriteString("A=A-1\n")
-	cw.strBuilder.WriteString("M=M|D\n")
-}
-
-func (cw *codeWriter) writeNot() {
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M-1\n")
-	cw.strBuilder.WriteString("M=!M\n")
+	fmt.Fprintf(cw.strBuilder, "M=M%sD\n", op)
 }
 
 func (cw *codeWriter) writeEq() {
