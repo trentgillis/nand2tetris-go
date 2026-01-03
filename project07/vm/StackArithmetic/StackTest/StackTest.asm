@@ -338,3 +338,6 @@ M=M|D
 @SP
 A=M-1
 M=!M
+(StackTest.END_LOOP)
+@StackTest.END_LOOP
+0;JEQ

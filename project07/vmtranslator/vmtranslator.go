@@ -1,8 +1,10 @@
 package vmtranslator
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -22,6 +24,10 @@ func Translate(f *os.File) {
 		vmt.codeWriter.write(vmt.parser.commandType(), vmt.parser.arg1(), vmt.parser.arg2())
 		vmt.parser.Advance()
 	}
+
+	// Write infinite loop to the end of the program
+	fname, _ := strings.CutSuffix(filepath.Base(vmt.asmFile.Name()), ".asm")
+	fmt.Fprintf(vmt.asmFile, "(%s.END_LOOP)\n@%s.END_LOOP\n0;JEQ\n", fname, fname)
 }
 
 func newVmTranslator(f *os.File) vmTranslator {

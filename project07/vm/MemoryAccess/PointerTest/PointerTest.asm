@@ -12,9 +12,7 @@ D=D+A
 @R15
 M=D
 @SP
-M=M-1
-@SP
-A=M
+AM=M-1
 D=M
 @R15
 A=M
@@ -33,9 +31,7 @@ D=D+A
 @R15
 M=D
 @SP
-M=M-1
-@SP
-A=M
+AM=M-1
 D=M
 @R15
 A=M
@@ -54,9 +50,7 @@ D=D+A
 @R15
 M=D
 @SP
-M=M-1
-@SP
-A=M
+AM=M-1
 D=M
 @R15
 A=M
@@ -75,9 +69,7 @@ D=D+A
 @R15
 M=D
 @SP
-M=M-1
-@SP
-A=M
+AM=M-1
 D=M
 @R15
 A=M
@@ -137,3 +129,6 @@ AM=M-1
 D=M
 A=A-1
 M=M+D
+(PointerTest.END_LOOP)
+@PointerTest.END_LOOP
+0;JEQ

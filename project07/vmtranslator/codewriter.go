@@ -85,8 +85,6 @@ func (cw *codeWriter) writePop(segment string, index string) {
 		cw.writePopTemp(index)
 	case "pointer":
 		cw.writePopPointer(index)
-	case "register":
-		cw.writePopReg(index)
 	}
 }
 
@@ -119,7 +117,8 @@ func (cw *codeWriter) writePushConstant(index string) {
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("M=D\n")
-	cw.incrementSp()
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M+1\n")
 }
 
 func (cw *codeWriter) writePushSegment(segment string, index string) {
@@ -133,7 +132,8 @@ func (cw *codeWriter) writePushSegment(segment string, index string) {
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("M=D\n")
-	cw.incrementSp()
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M+1\n")
 }
 
 func (cw *codeWriter) writePushStatic(index string) {
@@ -142,7 +142,8 @@ func (cw *codeWriter) writePushStatic(index string) {
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("M=D\n")
-	cw.incrementSp()
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M+1\n")
 }
 
 func (cw *codeWriter) writePushTemp(index string) {
@@ -154,7 +155,8 @@ func (cw *codeWriter) writePushTemp(index string) {
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("M=D\n")
-	cw.incrementSp()
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M+1\n")
 }
 
 func (cw *codeWriter) writePushPointer(index string) {
@@ -166,7 +168,8 @@ func (cw *codeWriter) writePushPointer(index string) {
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M\n")
 	cw.strBuilder.WriteString("M=D\n")
-	cw.incrementSp()
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M+1\n")
 }
 
 func (cw *codeWriter) writePopSegment(segment string, index string) {
@@ -178,9 +181,8 @@ func (cw *codeWriter) writePopSegment(segment string, index string) {
 	cw.strBuilder.WriteString("D=D+A\n")
 	fmt.Fprintf(cw.strBuilder, "@%s\n", regR15)
 	cw.strBuilder.WriteString("M=D\n")
-	cw.decrementSp()
 	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("AM=M-1\n")
 	cw.strBuilder.WriteString("D=M\n")
 	fmt.Fprintf(cw.strBuilder, "@%s\n", regR15)
 	cw.strBuilder.WriteString("A=M\n")
@@ -188,9 +190,8 @@ func (cw *codeWriter) writePopSegment(segment string, index string) {
 }
 
 func (cw *codeWriter) writePopStatic(index string) {
-	cw.decrementSp()
 	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("AM=M-1\n")
 	cw.strBuilder.WriteString("D=M\n")
 	fmt.Fprintf(cw.strBuilder, "@%s.%s\n", cw.fname, index)
 	cw.strBuilder.WriteString("M=D\n")
@@ -203,9 +204,8 @@ func (cw *codeWriter) writePopTemp(index string) {
 	cw.strBuilder.WriteString("D=D+A\n")
 	fmt.Fprintf(cw.strBuilder, "@%s\n", regR15)
 	cw.strBuilder.WriteString("M=D\n")
-	cw.decrementSp()
 	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("AM=M-1\n")
 	cw.strBuilder.WriteString("D=M\n")
 	fmt.Fprintf(cw.strBuilder, "@%s\n", regR15)
 	cw.strBuilder.WriteString("A=M\n")
@@ -219,21 +219,11 @@ func (cw *codeWriter) writePopPointer(index string) {
 	cw.strBuilder.WriteString("D=D+A\n")
 	fmt.Fprintf(cw.strBuilder, "@%s\n", regR15)
 	cw.strBuilder.WriteString("M=D\n")
-	cw.decrementSp()
 	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("AM=M-1\n")
 	cw.strBuilder.WriteString("D=M\n")
 	fmt.Fprintf(cw.strBuilder, "@%s\n", regR15)
 	cw.strBuilder.WriteString("A=M\n")
-	cw.strBuilder.WriteString("M=D\n")
-}
-
-func (cw *codeWriter) writePopReg(index string) {
-	cw.decrementSp()
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M\n")
-	cw.strBuilder.WriteString("D=M\n")
-	fmt.Fprintf(cw.strBuilder, "@R%s\n", index)
 	cw.strBuilder.WriteString("M=D\n")
 }
 
@@ -345,14 +335,4 @@ func (cw *codeWriter) writeGt() {
 	cw.strBuilder.WriteString("A=M-1\n")
 	cw.strBuilder.WriteString("M=-1\n") // true
 	fmt.Fprintf(cw.strBuilder, "(%s.GT_END.%d)\n", cw.fname, cw.numLabels)
-}
-
-func (cw *codeWriter) incrementSp() {
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("M=M+1\n")
-}
-
-func (cw *codeWriter) decrementSp() {
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("M=M-1\n")
 }
