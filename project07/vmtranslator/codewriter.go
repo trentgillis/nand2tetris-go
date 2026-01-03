@@ -94,12 +94,8 @@ func (cw *codeWriter) writeArithmetic(command string) {
 		cw.writeTwoOpArithmetic(command)
 	case "neg", "not":
 		cw.writeOneOpArithmetic(command)
-	case "eq":
-		cw.writeEq()
-	case "gt":
-		cw.writeGt()
-	case "lt":
-		cw.writeLt()
+	case "eq", "gt", "lt":
+		cw.writeLogical(command)
 	}
 }
 
@@ -247,68 +243,30 @@ func (cw *codeWriter) writeTwoOpArithmetic(command string) {
 	fmt.Fprintf(cw.strBuilder, "M=M%sD\n", op)
 }
 
-func (cw *codeWriter) writeEq() {
+func (cw *codeWriter) writeLogical(command string) {
 	cw.numLabels += 1
+	jmpMap := map[string]string{
+		"eq": "JEQ",
+		"lt": "JLT",
+		"gt": "JGT",
+	}
+	jmp, _ := jmpMap[command]
 
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("AM=M-1\n")
 	cw.strBuilder.WriteString("D=M\n")
 	cw.strBuilder.WriteString("A=A-1\n")
 	cw.strBuilder.WriteString("D=M-D\n")
-	fmt.Fprintf(cw.strBuilder, "@%s.EQ.%d\n", cw.fname, cw.numLabels)
-	cw.strBuilder.WriteString("D;JEQ\n")
+	fmt.Fprintf(cw.strBuilder, "@%s.%s.%d\n", cw.fname, strings.ToUpper(command), cw.numLabels)
+	fmt.Fprintf(cw.strBuilder, "D;%s\n", jmp)
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M-1\n")
 	cw.strBuilder.WriteString("M=0\n") // false
-	fmt.Fprintf(cw.strBuilder, "@%s.EQ_END.%d\n", cw.fname, cw.numLabels)
+	fmt.Fprintf(cw.strBuilder, "@%s.%s_END.%d\n", cw.fname, strings.ToUpper(command), cw.numLabels)
 	cw.strBuilder.WriteString("0;JEQ\n")
-	fmt.Fprintf(cw.strBuilder, "(%s.EQ.%d)\n", cw.fname, cw.numLabels)
+	fmt.Fprintf(cw.strBuilder, "(%s.%s.%d)\n", cw.fname, strings.ToUpper(command), cw.numLabels)
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M-1\n")
 	cw.strBuilder.WriteString("M=-1\n") // true
-	fmt.Fprintf(cw.strBuilder, "(%s.EQ_END.%d)\n", cw.fname, cw.numLabels)
-}
-
-func (cw *codeWriter) writeLt() {
-	cw.numLabels += 1
-
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("AM=M-1\n")
-	cw.strBuilder.WriteString("D=M\n")
-	cw.strBuilder.WriteString("A=A-1\n")
-	cw.strBuilder.WriteString("D=M-D\n")
-	fmt.Fprintf(cw.strBuilder, "@%s.LT.%d\n", cw.fname, cw.numLabels)
-	cw.strBuilder.WriteString("D;JLT\n")
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M-1\n")
-	cw.strBuilder.WriteString("M=0\n") // false
-	fmt.Fprintf(cw.strBuilder, "@%s.LT_END.%d\n", cw.fname, cw.numLabels)
-	cw.strBuilder.WriteString("0;JEQ\n")
-	fmt.Fprintf(cw.strBuilder, "(%s.LT.%d)\n", cw.fname, cw.numLabels)
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M-1\n")
-	cw.strBuilder.WriteString("M=-1\n") // true
-	fmt.Fprintf(cw.strBuilder, "(%s.LT_END.%d)\n", cw.fname, cw.numLabels)
-}
-
-func (cw *codeWriter) writeGt() {
-	cw.numLabels += 1
-
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("AM=M-1\n")
-	cw.strBuilder.WriteString("D=M\n")
-	cw.strBuilder.WriteString("A=A-1\n")
-	cw.strBuilder.WriteString("D=M-D\n")
-	fmt.Fprintf(cw.strBuilder, "@%s.GT.%d\n", cw.fname, cw.numLabels)
-	cw.strBuilder.WriteString("D;JGT\n")
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M-1\n")
-	cw.strBuilder.WriteString("M=0\n") // false
-	fmt.Fprintf(cw.strBuilder, "@%s.GT_END.%d\n", cw.fname, cw.numLabels)
-	cw.strBuilder.WriteString("0;JEQ\n")
-	fmt.Fprintf(cw.strBuilder, "(%s.GT.%d)\n", cw.fname, cw.numLabels)
-	cw.strBuilder.WriteString("@SP\n")
-	cw.strBuilder.WriteString("A=M-1\n")
-	cw.strBuilder.WriteString("M=-1\n") // true
-	fmt.Fprintf(cw.strBuilder, "(%s.GT_END.%d)\n", cw.fname, cw.numLabels)
+	fmt.Fprintf(cw.strBuilder, "(%s.%s_END.%d)\n", cw.fname, strings.ToUpper(command), cw.numLabels)
 }
