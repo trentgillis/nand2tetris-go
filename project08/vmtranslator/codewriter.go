@@ -53,6 +53,8 @@ func (cw *codeWriter) write(commandType int, arg1 string, arg2 string) {
 		cw.writePop(arg1, arg2)
 	case c_arithmetic:
 		cw.writeArithmetic(arg1)
+	case c_label:
+		cw.writeLabel(arg1)
 	}
 
 	if _, err := cw.outfile.WriteString(cw.strBuilder.String()); err != nil {
@@ -97,6 +99,10 @@ func (cw *codeWriter) writeArithmetic(command string) {
 	case "eq", "gt", "lt":
 		cw.writeLogical(command)
 	}
+}
+
+func (cw *codeWriter) writeLabel(label string) {
+	fmt.Fprintf(cw.strBuilder, "(%s)\n", label)
 }
 
 func (cw *codeWriter) writePushConstant(index string) {

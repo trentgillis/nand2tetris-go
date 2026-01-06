@@ -54,9 +54,6 @@ func newVmTranslator(programPath string) vmTranslator {
 		asmFilePath = programPath + fmt.Sprintf("/%s.asm", filepath.Base(programPath))
 	}
 
-	fmt.Println(asmFilePath)
-	fmt.Println(vmFilePaths)
-
 	asmFile, err := os.Create(asmFilePath)
 	if err != nil {
 		log.Fatalf("vmtranslator.newVmTranslator: %e\n", err)
@@ -79,7 +76,6 @@ func getVmPathsFromDir(dirPath string) []string {
 	vmFilePaths := []string{}
 	for _, entry := range dirEntries {
 		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".vm") {
-			fmt.Println(entry)
 			vmFilePaths = append(vmFilePaths, fmt.Sprintf("%s/%s", dirPath, entry.Name()))
 		}
 	}

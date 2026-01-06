@@ -60,6 +60,10 @@ func (p *parser) commandType() int {
 		return c_push
 	case "pop":
 		return c_pop
+	case "label":
+		return c_label
+	case "goto", "if-goto":
+		return c_goto
 	default:
 		log.Fatal("Invalid command")
 		return -1
