@@ -9,20 +9,17 @@ import (
 )
 
 type vmTranslator struct {
-	vmFile     *os.File
-	asmFile    *os.File
-	parser     parser
-	codeWriter codeWriter
+	vmFilePaths []string
+	asmFile     *os.File
+	codeWriter  codeWriter
 }
 
-func Translate(f *os.File) {
-	vmt := newVmTranslator(f)
+func Translate(programPath string) {
+	vmt := newVmTranslator(programPath)
 	defer vmt.asmFile.Close()
 
-	vmt.parser.Advance()
-	for vmt.parser.hasMoreLines {
-		vmt.codeWriter.write(vmt.parser.commandType(), vmt.parser.arg1(), vmt.parser.arg2())
-		vmt.parser.Advance()
+	for _, fPath := range vmt.vmFilePaths {
+		vmt.translateVmFile(fPath)
 	}
 
 	// Write infinite loop to the end of the program
@@ -30,19 +27,65 @@ func Translate(f *os.File) {
 	fmt.Fprintf(vmt.asmFile, "(%s.END_LOOP)\n@%s.END_LOOP\n0;JEQ\n", fname, fname)
 }
 
-func newVmTranslator(f *os.File) vmTranslator {
-	asmFile, err := os.Create(strings.Replace(f.Name(), ".vm", ".asm", 1))
+func (vmt *vmTranslator) translateVmFile(vmFilePath string) {
+	f, err := os.Open(vmFilePath)
 	if err != nil {
-		log.Fatalf("vmtranslator.New: %e\n", err)
+		log.Fatalf("vmtranslator.translateVmFile: %e\n", err)
 	}
+	defer f.Close()
 
 	parser := newParser(f)
-	codeWriter := newCodeWriter(asmFile)
-
-	return vmTranslator{
-		vmFile:     f,
-		asmFile:    asmFile,
-		parser:     parser,
-		codeWriter: codeWriter,
+	parser.Advance()
+	for parser.hasMoreLines {
+		vmt.codeWriter.write(parser.commandType(), parser.arg1(), parser.arg2())
+		parser.Advance()
 	}
+}
+
+func newVmTranslator(programPath string) vmTranslator {
+	var asmFilePath string
+	var vmFilePaths []string
+
+	if strings.HasSuffix(programPath, ".vm") {
+		vmFilePaths = append(vmFilePaths, programPath)
+		asmFilePath = strings.Replace(programPath, ".vm", ".asm", 1)
+	} else {
+		vmFilePaths = getVmPathsFromDir(programPath)
+		asmFilePath = programPath + fmt.Sprintf("/%s.asm", filepath.Base(programPath))
+	}
+
+	fmt.Println(asmFilePath)
+	fmt.Println(vmFilePaths)
+
+	asmFile, err := os.Create(asmFilePath)
+	if err != nil {
+		log.Fatalf("vmtranslator.newVmTranslator: %e\n", err)
+	}
+
+	codeWriter := newCodeWriter(asmFile)
+	return vmTranslator{
+		vmFilePaths: vmFilePaths,
+		asmFile:     asmFile,
+		codeWriter:  codeWriter,
+	}
+}
+
+func getVmPathsFromDir(dirPath string) []string {
+	dirEntries, err := os.ReadDir(dirPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	vmFilePaths := []string{}
+	for _, entry := range dirEntries {
+		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".vm") {
+			fmt.Println(entry)
+			vmFilePaths = append(vmFilePaths, fmt.Sprintf("%s/%s", dirPath, entry.Name()))
+		}
+	}
+	if len(vmFilePaths) == 0 {
+		log.Fatal("vmtranslator.getVmPathsFromDir: input directory contains no vm file for translation")
+	}
+
+	return vmFilePaths
 }

@@ -36,7 +36,7 @@ func (p *parser) Advance() {
 	for p.scanner.Scan() {
 		line := strings.TrimSpace(p.scanner.Text())
 		if idx := strings.Index(line, "//"); idx != -1 {
-			continue
+			line = strings.TrimSpace(line[:idx])
 		}
 		if len(line) == 0 {
 			continue

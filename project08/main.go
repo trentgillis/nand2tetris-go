@@ -4,24 +4,12 @@ import (
 	"jackvmt/vmtranslator"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("Filename was not provided")
+		log.Fatal("Path to vm file or directory for translation was not provided")
 	}
-
-	filename := os.Args[1]
-	if filepath.Ext(filename) != ".vm" {
-		log.Fatal("Input file have the .vm extension")
-	}
-
-	f, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	vmtranslator.Translate(f)
+	programPath := os.Args[1]
+	vmtranslator.Translate(programPath)
 }
