@@ -19,3 +19,4 @@ test:
 
 run: build
 	./jackvmt ./vm/ProgramFlow/BasicLoop
+	./jackvmt ./vm/ProgramFlow/FibonacciSeries

@@ -37,6 +37,8 @@ func (vmt *vmTranslator) translateVmFile(vmFilePath string) {
 	parser := newParser(f)
 	parser.Advance()
 	for parser.hasMoreLines {
+		// TODO: remove, this adds the vm command before all translations as a comment for debugging
+		fmt.Fprintf(vmt.asmFile, "// %s\n", parser.currLine)
 		vmt.codeWriter.write(parser.commandType(), parser.arg1(), parser.arg2())
 		parser.Advance()
 	}

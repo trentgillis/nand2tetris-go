@@ -62,8 +62,10 @@ func (p *parser) commandType() int {
 		return c_pop
 	case "label":
 		return c_label
-	case "goto", "if-goto":
+	case "goto":
 		return c_goto
+	case "if-goto":
+		return c_if
 	default:
 		log.Fatal("Invalid command")
 		return -1
@@ -72,7 +74,7 @@ func (p *parser) commandType() int {
 
 func (p *parser) arg1() string {
 	parts := strings.Split(p.currLine, " ")
-	if len(parts) == 1 {
+	if p.commandType() == c_arithmetic {
 		return parts[0]
 	}
 	if len(parts) < 2 {
