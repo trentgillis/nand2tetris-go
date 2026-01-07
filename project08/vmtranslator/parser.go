@@ -16,6 +16,7 @@ const (
 	c_if
 	c_function
 	c_call
+	c_return
 )
 
 type parser struct {
@@ -66,6 +67,12 @@ func (p *parser) commandType() int {
 		return c_goto
 	case "if-goto":
 		return c_if
+	case "function":
+		return c_function
+	case "call":
+		return c_call
+	case "return":
+		return c_return
 	default:
 		log.Fatal("Invalid command")
 		return -1

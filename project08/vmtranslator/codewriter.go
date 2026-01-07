@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -59,6 +60,14 @@ func (cw *codeWriter) write(commandType int, arg1 string, arg2 string) {
 		cw.writeGoto(arg1)
 	case c_if:
 		cw.writeIf(arg1)
+	case c_function:
+		nVars, err := strconv.Atoi(arg2)
+		if err != nil {
+			log.Fatal(err)
+		}
+		cw.writeFunction(arg1, nVars)
+	case c_return:
+		cw.writeReturn()
 	}
 
 	if _, err := cw.outfile.WriteString(cw.strBuilder.String()); err != nil {
@@ -120,6 +129,73 @@ func (cw *codeWriter) writeIf(label string) {
 	cw.strBuilder.WriteString("D=M\n")
 	fmt.Fprintf(cw.strBuilder, "@%s\n", label)
 	cw.strBuilder.WriteString("D;JNE")
+}
+
+func (cw *codeWriter) writeFunction(fnName string, nVars int) {
+	cw.writeLabel(fnName)
+	for range nVars {
+		cw.writePushConstant("0")
+	}
+}
+
+func (cw *codeWriter) writeReturn() {
+	// Get a reference to the start of caller's function frame
+	cw.strBuilder.WriteString("@LCL\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@frame\n")
+	cw.strBuilder.WriteString("M=D\n")
+
+	// Pop top value of the stack into argument 0 for use by the caller
+	cw.writePopSegment("argument", "0")
+
+	// Reposition the stack pointer to the appropriate position in the caller (@ARG+1)
+	cw.strBuilder.WriteString("@ARG\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=D+1\n")
+
+	// Reposition THAT pointer
+	cw.strBuilder.WriteString("@1\n")
+	cw.strBuilder.WriteString("D=A\n")
+	cw.strBuilder.WriteString("@frame\n")
+	cw.strBuilder.WriteString("A=M-D\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@THAT\n")
+	cw.strBuilder.WriteString("M=D\n")
+
+	// Reposition THIS pointer
+	cw.strBuilder.WriteString("@2\n")
+	cw.strBuilder.WriteString("D=A\n")
+	cw.strBuilder.WriteString("@frame\n")
+	cw.strBuilder.WriteString("A=M-D\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@THIS\n")
+	cw.strBuilder.WriteString("M=D\n")
+
+	// Reposition ARG pointer
+	cw.strBuilder.WriteString("@3\n")
+	cw.strBuilder.WriteString("D=A\n")
+	cw.strBuilder.WriteString("@frame\n")
+	cw.strBuilder.WriteString("A=M-D\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@ARG\n")
+	cw.strBuilder.WriteString("M=D\n")
+
+	// Reposition LCL pointer
+	cw.strBuilder.WriteString("@4\n")
+	cw.strBuilder.WriteString("D=A\n")
+	cw.strBuilder.WriteString("@frame\n")
+	cw.strBuilder.WriteString("A=M-D\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@LCL\n")
+	cw.strBuilder.WriteString("M=D\n")
+
+	// Calculate and goto return address
+	cw.strBuilder.WriteString("@5\n")
+	cw.strBuilder.WriteString("D=A\n")
+	cw.strBuilder.WriteString("@frame\n")
+	cw.strBuilder.WriteString("A=M-D\n")
+	cw.strBuilder.WriteString("0;JMP\n")
 }
 
 func (cw *codeWriter) writePushConstant(index string) {
