@@ -45,6 +45,18 @@ func newCodeWriter(outfile *os.File) codeWriter {
 	}
 }
 
+func (cw *codeWriter) writeInit() {
+	cw.strBuilder.WriteString("@256\n")
+	cw.strBuilder.WriteString("D=A\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.writeCall("Sys.init", 0)
+
+	if _, err := cw.outfile.WriteString(cw.strBuilder.String()); err != nil {
+		log.Fatal(err)
+	}
+}
+
 func (cw *codeWriter) write(commandType int, arg1 string, arg2 string) {
 	cw.strBuilder.Reset()
 	switch commandType {
@@ -66,6 +78,12 @@ func (cw *codeWriter) write(commandType int, arg1 string, arg2 string) {
 			log.Fatal(err)
 		}
 		cw.writeFunction(arg1, nVars)
+	case c_call:
+		nArgs, err := strconv.Atoi(arg2)
+		if err != nil {
+			log.Fatal(err)
+		}
+		cw.writeCall(arg1, nArgs)
 	case c_return:
 		cw.writeReturn()
 	}
@@ -128,7 +146,7 @@ func (cw *codeWriter) writeIf(label string) {
 	cw.strBuilder.WriteString("AM=M-1\n")
 	cw.strBuilder.WriteString("D=M\n")
 	fmt.Fprintf(cw.strBuilder, "@%s\n", label)
-	cw.strBuilder.WriteString("D;JNE")
+	cw.strBuilder.WriteString("D;JNE\n")
 }
 
 func (cw *codeWriter) writeFunction(fnName string, nVars int) {
@@ -138,11 +156,91 @@ func (cw *codeWriter) writeFunction(fnName string, nVars int) {
 	}
 }
 
+func (cw *codeWriter) writeCall(fnName string, nArgs int) {
+	cw.numLabels += 1
+	fnReturnLabel := fmt.Sprintf("%s$ret.%d", fnName, cw.numLabels)
+
+	// Push return address to the stack
+	fmt.Fprintf(cw.strBuilder, "@%s\n", fnReturnLabel)
+	cw.strBuilder.WriteString("D=A\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M+1\n")
+
+	// Push LCL pointer onto the stack
+	cw.strBuilder.WriteString("@LCL\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M+1\n")
+
+	// Push ARG pointer onto the stack
+	cw.strBuilder.WriteString("@ARG\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M+1\n")
+
+	// Push THIS pointer onto the stack
+	cw.strBuilder.WriteString("@THIS\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M+1\n")
+
+	// Push THAT pointer onto the stack
+	cw.strBuilder.WriteString("@THAT\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("M=D\n")
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("M=M+1\n")
+
+	// Reposition ARG
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("D=M\n")
+	fmt.Fprintf(cw.strBuilder, "@%d\n", nArgs+5)
+	cw.strBuilder.WriteString("D=D-A\n")
+	cw.strBuilder.WriteString("@ARG\n")
+	cw.strBuilder.WriteString("M=D\n")
+
+	// Reposition LCL
+	cw.strBuilder.WriteString("@SP\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@LCL\n")
+	cw.strBuilder.WriteString("M=D\n")
+
+	// Transfer control to called function
+	fmt.Fprintf(cw.strBuilder, "@%s\n", fnName)
+	cw.strBuilder.WriteString("0;JEQ\n")
+
+	// Inject label for jump back to caller
+	fmt.Fprintf(cw.strBuilder, "(%s)\n", fnReturnLabel)
+}
+
 func (cw *codeWriter) writeReturn() {
 	// Get a reference to the start of caller's function frame
 	cw.strBuilder.WriteString("@LCL\n")
 	cw.strBuilder.WriteString("D=M\n")
 	cw.strBuilder.WriteString("@frame\n")
+	cw.strBuilder.WriteString("M=D\n")
+
+	// Write return address to a temporary variable
+	cw.strBuilder.WriteString("@5\n")
+	cw.strBuilder.WriteString("D=A\n")
+	cw.strBuilder.WriteString("@frame\n")
+	cw.strBuilder.WriteString("A=M-D\n")
+	cw.strBuilder.WriteString("D=M\n")
+	cw.strBuilder.WriteString("@ret\n")
 	cw.strBuilder.WriteString("M=D\n")
 
 	// Pop top value of the stack into argument 0 for use by the caller
@@ -190,12 +288,10 @@ func (cw *codeWriter) writeReturn() {
 	cw.strBuilder.WriteString("@LCL\n")
 	cw.strBuilder.WriteString("M=D\n")
 
-	// Calculate and goto return address
-	cw.strBuilder.WriteString("@5\n")
-	cw.strBuilder.WriteString("D=A\n")
-	cw.strBuilder.WriteString("@frame\n")
-	cw.strBuilder.WriteString("A=M-D\n")
-	cw.strBuilder.WriteString("0;JMP\n")
+	// goto return address
+	cw.strBuilder.WriteString("@ret\n")
+	cw.strBuilder.WriteString("A=M\n")
+	cw.strBuilder.WriteString("0;JEQ\n")
 }
 
 func (cw *codeWriter) writePushConstant(index string) {

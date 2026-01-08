@@ -21,3 +21,4 @@ run: build
 	./jackvmt ./vm/ProgramFlow/BasicLoop
 	./jackvmt ./vm/ProgramFlow/FibonacciSeries
 	./jackvmt ./vm/FunctionCalls/SimpleFunction
+	./jackvmt ./vm/FunctionCalls/NestedCall

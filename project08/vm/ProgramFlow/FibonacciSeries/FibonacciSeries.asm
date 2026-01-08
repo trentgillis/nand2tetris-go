@@ -120,7 +120,8 @@ M=M+1
 AM=M-1
 D=M
 @COMPUTE_ELEMENT
-D;JNE// goto END
+D;JNE
+// goto END
 @END
 0;JEQ
 // label COMPUTE_ELEMENT

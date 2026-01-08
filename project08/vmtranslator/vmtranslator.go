@@ -12,11 +12,17 @@ type vmTranslator struct {
 	vmFilePaths []string
 	asmFile     *os.File
 	codeWriter  codeWriter
+	shouldInit  bool
 }
 
 func Translate(programPath string) {
 	vmt := newVmTranslator(programPath)
 	defer vmt.asmFile.Close()
+
+	if vmt.shouldInit {
+		vmt.codeWriter.strBuilder.Reset()
+		vmt.codeWriter.writeInit()
+	}
 
 	for _, fPath := range vmt.vmFilePaths {
 		vmt.translateVmFile(fPath)
@@ -47,12 +53,19 @@ func (vmt *vmTranslator) translateVmFile(vmFilePath string) {
 func newVmTranslator(programPath string) vmTranslator {
 	var asmFilePath string
 	var vmFilePaths []string
+	shouldInit := false
 
 	if strings.HasSuffix(programPath, ".vm") {
 		vmFilePaths = append(vmFilePaths, programPath)
 		asmFilePath = strings.Replace(programPath, ".vm", ".asm", 1)
 	} else {
 		vmFilePaths = getVmPathsFromDir(programPath)
+		for _, vmFilePath := range vmFilePaths {
+			if filepath.Base(vmFilePath) == "Sys.vm" {
+				shouldInit = true
+			}
+		}
+
 		asmFilePath = programPath + fmt.Sprintf("/%s.asm", filepath.Base(programPath))
 	}
 
@@ -66,6 +79,7 @@ func newVmTranslator(programPath string) vmTranslator {
 		vmFilePaths: vmFilePaths,
 		asmFile:     asmFile,
 		codeWriter:  codeWriter,
+		shouldInit:  shouldInit,
 	}
 }
 

@@ -116,7 +116,8 @@ M=M+1
 AM=M-1
 D=M
 @LOOP
-D;JNE// push local 0
+D;JNE
+// push local 0
 @LCL
 D=M
 @0
