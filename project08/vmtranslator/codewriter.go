@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -19,7 +18,7 @@ const (
 
 type codeWriter struct {
 	outfile         *os.File
-	fname           string
+	currFname       string
 	strBuilder      *strings.Builder
 	numLabels       int
 	segmentMappings map[string]string
@@ -34,11 +33,10 @@ func newCodeWriter(outfile *os.File) codeWriter {
 	}
 
 	var b strings.Builder
-	fname, _ := strings.CutSuffix(filepath.Base(outfile.Name()), ".asm")
 
 	return codeWriter{
 		outfile:         outfile,
-		fname:           fname,
+		currFname:       "",
 		strBuilder:      &b,
 		numLabels:       0,
 		segmentMappings: segmentMappings,
@@ -55,6 +53,10 @@ func (cw *codeWriter) writeInit() {
 	if _, err := cw.outfile.WriteString(cw.strBuilder.String()); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func (cw *codeWriter) setCurrFname(vmFileFname string) {
+	cw.currFname = vmFileFname
 }
 
 func (cw *codeWriter) write(commandType int, arg1 string, arg2 string) {
@@ -320,7 +322,7 @@ func (cw *codeWriter) writePushSegment(segment string, index string) {
 }
 
 func (cw *codeWriter) writePushStatic(index string) {
-	fmt.Fprintf(cw.strBuilder, "@%s.%s\n", cw.fname, index)
+	fmt.Fprintf(cw.strBuilder, "@%s.%s\n", cw.currFname, index)
 	cw.strBuilder.WriteString("D=M\n")
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M\n")
@@ -376,7 +378,7 @@ func (cw *codeWriter) writePopStatic(index string) {
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("AM=M-1\n")
 	cw.strBuilder.WriteString("D=M\n")
-	fmt.Fprintf(cw.strBuilder, "@%s.%s\n", cw.fname, index)
+	fmt.Fprintf(cw.strBuilder, "@%s.%s\n", cw.currFname, index)
 	cw.strBuilder.WriteString("M=D\n")
 }
 
@@ -452,16 +454,16 @@ func (cw *codeWriter) writeLogical(command string) {
 	cw.strBuilder.WriteString("D=M\n")
 	cw.strBuilder.WriteString("A=A-1\n")
 	cw.strBuilder.WriteString("D=M-D\n")
-	fmt.Fprintf(cw.strBuilder, "@%s.%s.%d\n", cw.fname, strings.ToUpper(command), cw.numLabels)
+	fmt.Fprintf(cw.strBuilder, "@%s.%s.%d\n", cw.currFname, strings.ToUpper(command), cw.numLabels)
 	fmt.Fprintf(cw.strBuilder, "D;%s\n", jmp)
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M-1\n")
 	cw.strBuilder.WriteString("M=0\n") // false
-	fmt.Fprintf(cw.strBuilder, "@%s.%s_END.%d\n", cw.fname, strings.ToUpper(command), cw.numLabels)
+	fmt.Fprintf(cw.strBuilder, "@%s.%s_END.%d\n", cw.currFname, strings.ToUpper(command), cw.numLabels)
 	cw.strBuilder.WriteString("0;JEQ\n")
-	fmt.Fprintf(cw.strBuilder, "(%s.%s.%d)\n", cw.fname, strings.ToUpper(command), cw.numLabels)
+	fmt.Fprintf(cw.strBuilder, "(%s.%s.%d)\n", cw.currFname, strings.ToUpper(command), cw.numLabels)
 	cw.strBuilder.WriteString("@SP\n")
 	cw.strBuilder.WriteString("A=M-1\n")
 	cw.strBuilder.WriteString("M=-1\n") // true
-	fmt.Fprintf(cw.strBuilder, "(%s.%s_END.%d)\n", cw.fname, strings.ToUpper(command), cw.numLabels)
+	fmt.Fprintf(cw.strBuilder, "(%s.%s_END.%d)\n", cw.currFname, strings.ToUpper(command), cw.numLabels)
 }

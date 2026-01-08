@@ -22,3 +22,5 @@ run: build
 	./jackvmt ./vm/ProgramFlow/FibonacciSeries
 	./jackvmt ./vm/FunctionCalls/SimpleFunction
 	./jackvmt ./vm/FunctionCalls/NestedCall
+	./jackvmt ./vm/FunctionCalls/FibonacciElement
+	./jackvmt ./vm/FunctionCalls/StaticsTest

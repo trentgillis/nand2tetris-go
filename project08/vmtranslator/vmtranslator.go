@@ -40,6 +40,10 @@ func (vmt *vmTranslator) translateVmFile(vmFilePath string) {
 	}
 	defer f.Close()
 
+	// Sets the filename attr on our codewrite for use in creating unique symbols
+	vmFname, _ := strings.CutSuffix(filepath.Base(vmFilePath), ".vm")
+	vmt.codeWriter.setCurrFname(vmFname)
+
 	parser := newParser(f)
 	parser.Advance()
 	for parser.hasMoreLines {
