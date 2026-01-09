@@ -28,9 +28,12 @@ func Translate(programPath string) {
 		vmt.translateVmFile(fPath)
 	}
 
-	// Write infinite loop to the end of the program
-	fname, _ := strings.CutSuffix(filepath.Base(vmt.asmFile.Name()), ".asm")
-	fmt.Fprintf(vmt.asmFile, "(%s.END_LOOP)\n@%s.END_LOOP\n0;JEQ\n", fname, fname)
+	// The Sys.init function handles entering an infinite loop after executionon behalf of
+	// our program. If it is not present however, add an end of program loop manually.
+	if !vmt.shouldInit {
+		fname, _ := strings.CutSuffix(filepath.Base(vmt.asmFile.Name()), ".asm")
+		fmt.Fprintf(vmt.asmFile, "(%s.END_LOOP)\n@%s.END_LOOP\n0;JEQ\n", fname, fname)
+	}
 }
 
 func (vmt *vmTranslator) translateVmFile(vmFilePath string) {
@@ -47,8 +50,6 @@ func (vmt *vmTranslator) translateVmFile(vmFilePath string) {
 	parser := newParser(f)
 	parser.Advance()
 	for parser.hasMoreLines {
-		// TODO: remove, this adds the vm command before all translations as a comment for debugging
-		fmt.Fprintf(vmt.asmFile, "// %s\n", parser.currLine)
 		vmt.codeWriter.write(parser.commandType(), parser.arg1(), parser.arg2())
 		parser.Advance()
 	}
