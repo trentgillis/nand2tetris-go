@@ -14,7 +14,7 @@ class Game {
 
     method void printCurrentPlayer() {
         do Output.moveCursor(0,0);
-        do Output.printString("Current player: ");
+        do Output.printString("Current Player: ");
         do Output.printString(currentPlayer);
         return;
     }

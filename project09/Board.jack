@@ -2,15 +2,67 @@ class Board {
     field Array cells;
 
     constructor Board new() {
+        var Array row;
+        var int i;
+
         let cells = Array.new(9);
+        let i = 0;
+        while (i < 3) {
+            let row = Array.new(3);
+            let cells[i] = row;
+            let i = i + 1;
+        }
+
+        do drawX(0,0);
+        do drawX(2,2);
+        do drawO(0,2);
+        do drawO(2,0);
+        do drawO(1,1);
 
         return this;
     }
 
     method void printBoard() {
-        do Output.moveCursor(1,0);
-        do Output.printString("printBoard");
-        do Output.println();
+        do Screen.setColor(true);
+        // Vertical lines
+        do Screen.drawLine(231, 50, 231, 200);
+        do Screen.drawLine(281, 50, 281, 200);
+        // Horizontal lines
+        do Screen.drawLine(181, 100, 331, 100);
+        do Screen.drawLine(181, 150, 331, 150);
         return;
+    }
+
+    method void drawX(int row, int col) {
+        var Array center;
+        let center = getCellCenter(row, col);
+
+        do Screen.setColor(true);
+        do Screen.drawLine(center[0] - 10, center[1] + 10, center[0] + 10, center[1] - 10);
+        do Screen.drawLine(center[0] + 10, center[1] + 10, center[0] - 10, center[1] - 10);
+        return;
+    }
+
+    method void drawO(int row, int col) {
+        var Array center;
+        let center = getCellCenter(row, col);
+
+        do Screen.setColor(true);
+        do Screen.drawCircle(center[0], center[1], 10);
+        do Screen.setColor(false);
+        do Screen.drawCircle(center[0], center[1], 9);
+        return;
+    }
+
+    method Array getCellCenter(int row, int col) {
+        // x root 181
+        // y root 50
+        var Array center;
+
+        let center = Array.new(2);
+        let center[0] = 181 + 25 + (row * 50);
+        let center[1] = 50 + 25 + (col * 50);
+
+        return center;
     }
 }
