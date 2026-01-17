@@ -1,0 +1,16 @@
+class Board {
+    field Array cells;
+
+    constructor Board new() {
+        let cells = Array.new(9);
+
+        return this;
+    }
+
+    method void printBoard() {
+        do Output.moveCursor(1,0);
+        do Output.printString("printBoard");
+        do Output.println();
+        return;
+    }
+}

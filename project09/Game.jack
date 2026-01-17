@@ -1,0 +1,25 @@
+class Game {
+    field Board b;
+    field String currentPlayer;
+
+    constructor Game new() {
+        let currentPlayer = "O";
+        let b = Board.new();
+
+        do printCurrentPlayer();
+        do b.printBoard();
+
+        return this;
+    }
+
+    method void printCurrentPlayer() {
+        do Output.moveCursor(0,0);
+        do Output.printString("Current player: ");
+        do Output.printString(currentPlayer);
+        return;
+    }
+
+    method String getCurrentPlayer() {
+        return currentPlayer;
+    }
+}
