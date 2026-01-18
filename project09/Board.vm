@@ -908,10 +908,46 @@ goto WHILE_EXP0
 label WHILE_END0
 push local 0
 return
-function Board.checkVerticalWin 0
+function Board.checkVerticalWin 3
 push argument 0
 pop pointer 0
 push constant 0
+not
+pop local 0
+push constant 0
+pop local 2
+label WHILE_EXP0
+push local 2
+push constant 3
+lt
+not
+if-goto WHILE_END0
+push pointer 0
+push local 2
+push argument 2
+call Board.getCellIndex 3
+pop local 1
+push local 1
+push this 0
+add
+pop pointer 1
+push that 0
+push argument 1
+eq
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+pop local 0
+label IF_FALSE0
+push local 2
+push constant 1
+add
+pop local 2
+goto WHILE_EXP0
+label WHILE_END0
+push local 0
 return
 function Board.checkDiagonalWin 0
 push argument 0

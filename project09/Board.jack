@@ -231,8 +231,22 @@ class Board {
         return isWin;
     }
 
-    method boolean checkVerticalWin(int player, int row) {
-        return false;
+    method boolean checkVerticalWin(int player, int col) {
+        var boolean isWin;
+        var int cellIndex;
+        var int row;
+
+        let isWin = true;
+        let row = 0;
+        while (row < 3) {
+            let cellIndex = getCellIndex(row, col);
+            if (~(cells[cellIndex] = player)) {
+                let isWin = false;
+            }
+            let row = row + 1;
+        }
+
+        return isWin;
     }
 
     method boolean checkDiagonalWin(int player) {
