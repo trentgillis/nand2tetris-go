@@ -250,6 +250,34 @@ class Board {
     }
 
     method boolean checkDiagonalWin(int player) {
-        return false;
+        var boolean lrWin;
+        var boolean rlWin;
+        var int cellIndex;
+
+        let lrWin = true;
+        let cellIndex = getCellIndex(0, 0);
+        if (~(cells[cellIndex] = player)) {
+            let lrWin = false;
+        }
+        let cellIndex = getCellIndex(1, 1);
+        if (~(cells[cellIndex] = player)) {
+            let lrWin = false;
+        }
+        let cellIndex = getCellIndex(2, 2);
+        if (~(cells[cellIndex] = player)) {
+            let lrWin = false;
+        }
+
+        let rlWin = true;
+        let cellIndex = getCellIndex(0, 2);
+        if (~(cells[cellIndex] = player)) {
+            let rlWin = false;
+        }
+        let cellIndex = getCellIndex(2, 0);
+        if (~(cells[cellIndex] = player)) {
+            let rlWin = false;
+        }
+
+        return lrWin | rlWin;
     }
 }
