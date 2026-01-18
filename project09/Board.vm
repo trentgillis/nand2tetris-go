@@ -1,5 +1,5 @@
 function Board.new 2
-push constant 1
+push constant 2
 call Memory.alloc 1
 pop pointer 0
 push constant 9
@@ -9,17 +9,15 @@ push constant 0
 pop local 1
 label WHILE_EXP0
 push local 1
-push constant 3
+push constant 9
 lt
 not
 if-goto WHILE_END0
-push constant 3
-call Array.new 1
-pop local 0
 push local 1
 push this 0
 add
-push local 0
+push constant 1
+neg
 pop temp 0
 pop pointer 1
 push temp 0
@@ -30,32 +28,92 @@ add
 pop local 1
 goto WHILE_EXP0
 label WHILE_END0
-push pointer 0
-push constant 0
-push constant 0
-call Board.drawX 3
-pop temp 0
-push pointer 0
 push constant 2
-push constant 2
-call Board.drawX 3
-pop temp 0
-push pointer 0
+call Array.new 1
+pop this 1
 push constant 0
+pop local 1
+label WHILE_EXP1
+push local 1
 push constant 2
-call Board.drawO 3
-pop temp 0
-push pointer 0
-push constant 2
+lt
+not
+if-goto WHILE_END1
+push local 1
+push this 1
+add
 push constant 0
-call Board.drawO 3
 pop temp 0
-push pointer 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 1
 push constant 1
-push constant 1
-call Board.drawO 3
-pop temp 0
+add
+pop local 1
+goto WHILE_EXP1
+label WHILE_END1
 push pointer 0
+return
+function Board.select 2
+push argument 0
+pop pointer 0
+push constant 0
+pop local 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 3
+call Math.multiply 2
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+add
+pop local 1
+push local 1
+push this 0
+add
+pop pointer 1
+push that 0
+push constant 1
+neg
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+not
+pop local 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 3
+call Math.multiply 2
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+add
+push this 0
+add
+push argument 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push pointer 0
+push argument 1
+call Board.drawSelection 2
+pop temp 0
+label IF_FALSE0
+push local 0
 return
 function Board.printBoard 0
 push argument 0
@@ -90,6 +148,70 @@ call Screen.drawLine 4
 pop temp 0
 push constant 0
 return
+function Board.initSelection 1
+push argument 0
+pop pointer 0
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push this 0
+add
+pop pointer 1
+push that 0
+push constant 1
+neg
+eq
+not
+not
+if-goto WHILE_END0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+push this 1
+add
+push local 0
+push constant 3
+call Math.divide 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 1
+push this 1
+add
+push local 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 3
+call Math.multiply 2
+sub
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.drawSelectionIndicator 3
+pop temp 0
+push constant 0
+return
 function Board.drawX 1
 push argument 0
 pop pointer 0
@@ -98,6 +220,19 @@ push argument 1
 push argument 2
 call Board.getCellCenter 3
 pop local 0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.clearSelectionIndicator 3
+pop temp 0
 push constant 0
 not
 call Screen.setColor 1
@@ -172,6 +307,19 @@ push argument 1
 push argument 2
 call Board.getCellCenter 3
 pop local 0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.clearSelectionIndicator 3
+pop temp 0
 push constant 0
 not
 call Screen.setColor 1
@@ -205,6 +353,104 @@ push that 0
 push constant 9
 call Screen.drawCircle 3
 pop temp 0
+push constant 0
+return
+function Board.clearSelectionIndicator 1
+push argument 0
+pop pointer 0
+push pointer 0
+push argument 1
+push argument 2
+call Board.getCellCenter 3
+pop local 0
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push constant 0
+push local 0
+add
+pop pointer 1
+push that 0
+push constant 1
+push local 0
+add
+pop pointer 1
+push that 0
+push constant 3
+call Screen.drawCircle 3
+pop temp 0
+push constant 0
+return
+function Board.drawSelectionIndicator 1
+push argument 0
+pop pointer 0
+push pointer 0
+push argument 1
+push argument 2
+call Board.getCellCenter 3
+pop local 0
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push constant 0
+push local 0
+add
+pop pointer 1
+push that 0
+push constant 1
+push local 0
+add
+pop pointer 1
+push that 0
+push constant 3
+call Screen.drawCircle 3
+pop temp 0
+push constant 0
+return
+function Board.drawSelection 0
+push argument 0
+pop pointer 0
+push argument 1
+push constant 1
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.drawO 3
+pop temp 0
+label IF_FALSE0
+push argument 1
+push constant 2
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.drawX 3
+pop temp 0
+label IF_FALSE1
 push constant 0
 return
 function Board.getCellCenter 1
@@ -242,4 +488,232 @@ pop pointer 1
 push temp 0
 pop that 0
 push local 0
+return
+function Board.moveLeft 0
+push argument 0
+pop pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 0
+eq
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.clearSelectionIndicator 3
+pop temp 0
+push constant 0
+push this 1
+add
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+sub
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.drawSelectionIndicator 3
+pop temp 0
+label IF_FALSE0
+push constant 0
+return
+function Board.moveRight 0
+push argument 0
+pop pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 2
+eq
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.clearSelectionIndicator 3
+pop temp 0
+push constant 0
+push this 1
+add
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+add
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.drawSelectionIndicator 3
+pop temp 0
+label IF_FALSE0
+push constant 0
+return
+function Board.moveUp 0
+push argument 0
+pop pointer 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 0
+eq
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.clearSelectionIndicator 3
+pop temp 0
+push constant 1
+push this 1
+add
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+sub
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.drawSelectionIndicator 3
+pop temp 0
+label IF_FALSE0
+push constant 0
+return
+function Board.moveDown 0
+push argument 0
+pop pointer 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 2
+eq
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.clearSelectionIndicator 3
+pop temp 0
+push constant 1
+push this 1
+add
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+add
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+call Board.drawSelectionIndicator 3
+pop temp 0
+label IF_FALSE0
+push constant 0
 return

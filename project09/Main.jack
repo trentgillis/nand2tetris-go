@@ -1,9 +1,23 @@
 class Main {
     function void main() {
+        var boolean keepPlaying;
+        var boolean currentGameFinished;
         var Game g;
 
-        let g = Game.new();
-        do g.printCurrentPlayer();
+        let keepPlaying = true;
+        let currentGameFinished = false;
+        while (keepPlaying) {
+            let g = Game.new();
+
+            while (~currentGameFinished) {
+                do g.nextTurn();
+                let currentGameFinished = g.getGameFinished();
+            }
+            do g.printWinner();
+
+            // TODO: update to allow choosing to end program or play again;
+            let keepPlaying = false;
+        }
 
         return;
     }

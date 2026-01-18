@@ -1,25 +1,93 @@
 class Game {
     field Board b;
-    field String currentPlayer;
+    field int currentPlayer; // 1 = O, 2 = X
+    field boolean gameFinished;
 
     constructor Game new() {
-        let currentPlayer = "O";
+        let currentPlayer = 1;
+        let gameFinished = false;
         let b = Board.new();
 
-        do printCurrentPlayer();
         do b.printBoard();
 
         return this;
     }
 
+    method boolean getGameFinished() {
+        return gameFinished;
+    }
+
+    method void nextTurn() {
+        var Array playerSelection;
+        var boolean turnComplete;
+        var boolean validSelection;
+        var char key;
+
+        let turnComplete = false;
+        // Sets the players selection to the first unocupied location on the board
+        do b.initSelection();
+        do printCurrentPlayer();
+
+        while (~turnComplete) {
+            let key = 0;
+            while (key = 0) {
+                let key = Keyboard.keyPressed();
+            }
+            while (~(Keyboard.keyPressed() = 0)) {
+                // wait for key to no longer be pressed
+            }
+
+            // Handle arrow keys
+            if (key = 130) {
+                do b.moveLeft();
+            }
+            if (key = 131) {
+                do b.moveUp();
+            }
+            if (key = 132) {
+                do b.moveRight();
+            }
+            if (key = 133) {
+                do b.moveDown();
+            }
+            // Enter key, make selection, check win state, move to next turn
+            if (key = 128) {
+                let validSelection = b.select(currentPlayer);
+                if (validSelection) {
+                    let turnComplete = true;
+                    do updatePlayer();
+                }
+            }
+        }
+        return;
+    }
+
+    method void updatePlayer() {
+        if (currentPlayer = 1) {
+            let currentPlayer = 2;
+        } else {
+            let currentPlayer = 1;
+        }
+        return;
+    }
+
     method void printCurrentPlayer() {
-        do Output.moveCursor(0,0);
+        do Output.moveCursor(0, 0);
         do Output.printString("Current Player: ");
-        do Output.printString(currentPlayer);
+        if (currentPlayer = 1) {
+            do Output.printString("O");
+        } else {
+            do Output.printString("X");
+        }
+        return;
+    }
+
+    method void printWinner() {
         return;
     }
 
     method String getCurrentPlayer() {
         return currentPlayer;
     }
+
 }
