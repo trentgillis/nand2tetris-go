@@ -127,8 +127,15 @@ class Board {
     }
 
     method void moveLeft() {
+        var int selectedCell;
+
+        let selectedCell = getSelectedCell();
         if (~(playerSelection[0] = 0)) {
-            do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+            if (~(cells[selectedCell] = -1)) {
+                do drawSelection(cells[selectedCell]);
+            } else {
+                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+            }
             let playerSelection[0] = playerSelection[0] - 1;
             do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
         }
@@ -136,8 +143,15 @@ class Board {
     }
 
     method void moveRight() {
+        var int selectedCell;
+
+        let selectedCell = getSelectedCell();
         if (~(playerSelection[0] = 2)) {
-            do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+            if (~(cells[selectedCell] = -1)) {
+                do drawSelection(cells[selectedCell]);
+            } else {
+                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+            }
             let playerSelection[0] = playerSelection[0] + 1;
             do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
         }
@@ -145,8 +159,15 @@ class Board {
     }
 
     method void moveUp() {
+        var int selectedCell;
+
+        let selectedCell = getSelectedCell();
         if (~(playerSelection[1] = 0)) {
-            do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+            if (~(cells[selectedCell] = -1)) {
+                do drawSelection(cells[selectedCell]);
+            } else {
+                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+            }
             let playerSelection[1] = playerSelection[1] - 1;
             do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
         }
@@ -154,11 +175,22 @@ class Board {
     }
 
     method void moveDown() {
+        var int selectedCell;
+
+        let selectedCell = getSelectedCell();
         if (~(playerSelection[1] = 2)) {
-            do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+            if (~(cells[selectedCell] = -1)) {
+                do drawSelection(cells[selectedCell]);
+            } else {
+                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+            }
             let playerSelection[1] = playerSelection[1] + 1;
             do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
         }
         return;
+    }
+
+    method int getSelectedCell() {
+        return (playerSelection[0] * 3) + playerSelection[1];
     }
 }

@@ -489,9 +489,12 @@ push temp 0
 pop that 0
 push local 0
 return
-function Board.moveLeft 0
+function Board.moveLeft 1
 push argument 0
 pop pointer 0
+push pointer 0
+call Board.getSelectedCell 1
+pop local 0
 push constant 0
 push this 1
 add
@@ -503,6 +506,28 @@ not
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
+push local 0
+push this 0
+add
+pop pointer 1
+push that 0
+push constant 1
+neg
+eq
+not
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push pointer 0
+push local 0
+push this 0
+add
+pop pointer 1
+push that 0
+call Board.drawSelection 2
+pop temp 0
+goto IF_END1
+label IF_FALSE1
 push pointer 0
 push constant 0
 push this 1
@@ -516,6 +541,7 @@ pop pointer 1
 push that 0
 call Board.clearSelectionIndicator 3
 pop temp 0
+label IF_END1
 push constant 0
 push this 1
 add
@@ -546,9 +572,12 @@ pop temp 0
 label IF_FALSE0
 push constant 0
 return
-function Board.moveRight 0
+function Board.moveRight 1
 push argument 0
 pop pointer 0
+push pointer 0
+call Board.getSelectedCell 1
+pop local 0
 push constant 0
 push this 1
 add
@@ -560,6 +589,28 @@ not
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
+push local 0
+push this 0
+add
+pop pointer 1
+push that 0
+push constant 1
+neg
+eq
+not
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push pointer 0
+push local 0
+push this 0
+add
+pop pointer 1
+push that 0
+call Board.drawSelection 2
+pop temp 0
+goto IF_END1
+label IF_FALSE1
 push pointer 0
 push constant 0
 push this 1
@@ -573,6 +624,7 @@ pop pointer 1
 push that 0
 call Board.clearSelectionIndicator 3
 pop temp 0
+label IF_END1
 push constant 0
 push this 1
 add
@@ -603,9 +655,12 @@ pop temp 0
 label IF_FALSE0
 push constant 0
 return
-function Board.moveUp 0
+function Board.moveUp 1
 push argument 0
 pop pointer 0
+push pointer 0
+call Board.getSelectedCell 1
+pop local 0
 push constant 1
 push this 1
 add
@@ -617,6 +672,28 @@ not
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
+push local 0
+push this 0
+add
+pop pointer 1
+push that 0
+push constant 1
+neg
+eq
+not
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push pointer 0
+push local 0
+push this 0
+add
+pop pointer 1
+push that 0
+call Board.drawSelection 2
+pop temp 0
+goto IF_END1
+label IF_FALSE1
 push pointer 0
 push constant 0
 push this 1
@@ -630,6 +707,7 @@ pop pointer 1
 push that 0
 call Board.clearSelectionIndicator 3
 pop temp 0
+label IF_END1
 push constant 1
 push this 1
 add
@@ -660,9 +738,12 @@ pop temp 0
 label IF_FALSE0
 push constant 0
 return
-function Board.moveDown 0
+function Board.moveDown 1
 push argument 0
 pop pointer 0
+push pointer 0
+call Board.getSelectedCell 1
+pop local 0
 push constant 1
 push this 1
 add
@@ -674,6 +755,28 @@ not
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
+push local 0
+push this 0
+add
+pop pointer 1
+push that 0
+push constant 1
+neg
+eq
+not
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push pointer 0
+push local 0
+push this 0
+add
+pop pointer 1
+push that 0
+call Board.drawSelection 2
+pop temp 0
+goto IF_END1
+label IF_FALSE1
 push pointer 0
 push constant 0
 push this 1
@@ -687,6 +790,7 @@ pop pointer 1
 push that 0
 call Board.clearSelectionIndicator 3
 pop temp 0
+label IF_END1
 push constant 1
 push this 1
 add
@@ -716,4 +820,21 @@ call Board.drawSelectionIndicator 3
 pop temp 0
 label IF_FALSE0
 push constant 0
+return
+function Board.getSelectedCell 0
+push argument 0
+pop pointer 0
+push constant 0
+push this 1
+add
+pop pointer 1
+push that 0
+push constant 3
+call Math.multiply 2
+push constant 1
+push this 1
+add
+pop pointer 1
+push that 0
+add
 return
