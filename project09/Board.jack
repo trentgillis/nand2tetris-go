@@ -27,10 +27,10 @@ class Board {
         var int selectedCell;
 
         let isValid = false;
-        let selectedCell = (playerSelection[0] * 3) + playerSelection[1];
+        let selectedCell = getSelectedCell();
         if (cells[selectedCell] = -1) {
             let isValid = true;
-            let cells[(playerSelection[0] * 3) + playerSelection[1]] = player;
+            let cells[selectedCell] = player;
             do drawSelection(player);
         }
         return isValid;
@@ -123,46 +123,13 @@ class Board {
     method Array getCellCenter(int row, int col) {
         var Array center;
         let center = Array.new(2);
-        let center[0] = 181 + 25 + (row * 50);
-        let center[1] = 50 + 25 + (col * 50);
+        let center[0] = 181 + 25 + (col * 50);
+        let center[1] = 50 + 25 + (row * 50);
 
-        do center.dispose();
         return center;
     }
 
     method void moveLeft() {
-        var int selectedCell;
-
-        let selectedCell = getSelectedCell();
-        if (~(playerSelection[0] = 0)) {
-            if (~(cells[selectedCell] = -1)) {
-                do drawSelection(cells[selectedCell]);
-            } else {
-                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
-            }
-            let playerSelection[0] = playerSelection[0] - 1;
-            do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
-        }
-        return;
-    }
-
-    method void moveRight() {
-        var int selectedCell;
-
-        let selectedCell = getSelectedCell();
-        if (~(playerSelection[0] = 2)) {
-            if (~(cells[selectedCell] = -1)) {
-                do drawSelection(cells[selectedCell]);
-            } else {
-                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
-            }
-            let playerSelection[0] = playerSelection[0] + 1;
-            do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
-        }
-        return;
-    }
-
-    method void moveUp() {
         var int selectedCell;
 
         let selectedCell = getSelectedCell();
@@ -178,7 +145,7 @@ class Board {
         return;
     }
 
-    method void moveDown() {
+    method void moveRight() {
         var int selectedCell;
 
         let selectedCell = getSelectedCell();
@@ -194,7 +161,81 @@ class Board {
         return;
     }
 
+    method void moveUp() {
+        var int selectedCell;
+
+        let selectedCell = getSelectedCell();
+        if (~(playerSelection[0] = 0)) {
+            if (~(cells[selectedCell] = -1)) {
+                do drawSelection(cells[selectedCell]);
+            } else {
+                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+            }
+            let playerSelection[0] = playerSelection[0] - 1;
+            do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
+        }
+        return;
+    }
+
+    method void moveDown() {
+        var int selectedCell;
+
+        let selectedCell = getSelectedCell();
+        if (~(playerSelection[0] = 2)) {
+            if (~(cells[selectedCell] = -1)) {
+                do drawSelection(cells[selectedCell]);
+            } else {
+                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+            }
+            let playerSelection[0] = playerSelection[0] + 1;
+            do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
+        }
+        return;
+    }
+
     method int getSelectedCell() {
         return (playerSelection[0] * 3) + playerSelection[1];
+    }
+
+    method int getCellIndex(int row, int col) {
+        return (row * 3) + col;
+    }
+
+    method boolean checkWin(int player) {
+        var boolean isHorizontalWin;
+        var boolean isVerticalWin;
+        var boolean isDiagonalWin;
+
+        let isHorizontalWin = checkHorizontalWin(player, playerSelection[0]);
+        let isVerticalWin = checkVerticalWin(player, playerSelection[1]);
+        let isDiagonalWin = checkDiagonalWin(player);
+
+        return isHorizontalWin | isVerticalWin | isDiagonalWin;
+    }
+
+    method boolean checkHorizontalWin(int player, int row) {
+        var boolean isWin;
+        var int cellIndex;
+        var int col;
+
+        let isWin = true;
+        let col = 0;
+        while (col < 3) {
+            let cellIndex = getCellIndex(row, col);
+            if (~(cells[cellIndex] = player)) {
+                let isWin = false;
+            }
+            let col = col + 1;
+        }
+
+        return isWin;
+    }
+
+    method boolean checkVerticalWin(int player, int row) {
+        return false;
+    }
+
+    method boolean checkDiagonalWin(int player) {
+        return false;
     }
 }

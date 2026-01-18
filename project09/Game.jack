@@ -21,10 +21,11 @@ class Game {
         var Array playerSelection;
         var boolean turnComplete;
         var boolean validSelection;
+        var boolean isWin;
         var char key;
 
+        let isWin = false;
         let turnComplete = false;
-        // Sets the players selection to the first unocupied location on the board
         do b.initSelection();
         do printCurrentPlayer();
 
@@ -55,7 +56,12 @@ class Game {
                 let validSelection = b.select(currentPlayer);
                 if (validSelection) {
                     let turnComplete = true;
-                    do updatePlayer();
+                    let isWin = b.checkWin(currentPlayer);
+                    if (isWin) {
+                        let gameFinished = true;
+                    } else {
+                        do updatePlayer();
+                    }
                 }
             }
         }
@@ -83,11 +89,18 @@ class Game {
     }
 
     method void printWinner() {
+        do Output.moveCursor(0, 0);
+        do Output.printString("Player ");
+        if (currentPlayer = 1) {
+            do Output.printString("O");
+        } else {
+            do Output.printString("X");
+        }
+        do Output.printString(" Wins!");
         return;
     }
 
     method String getCurrentPlayer() {
         return currentPlayer;
     }
-
 }
