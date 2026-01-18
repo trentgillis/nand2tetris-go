@@ -297,6 +297,9 @@ push constant 10
 sub
 call Screen.drawLine 4
 pop temp 0
+push local 0
+call Array.dispose 1
+pop temp 0
 push constant 0
 return
 function Board.drawO 1
@@ -353,6 +356,9 @@ push that 0
 push constant 9
 call Screen.drawCircle 3
 pop temp 0
+push local 0
+call Array.dispose 1
+pop temp 0
 push constant 0
 return
 function Board.clearSelectionIndicator 1
@@ -378,6 +384,9 @@ pop pointer 1
 push that 0
 push constant 3
 call Screen.drawCircle 3
+pop temp 0
+push local 0
+call Array.dispose 1
 pop temp 0
 push constant 0
 return
@@ -405,6 +414,9 @@ pop pointer 1
 push that 0
 push constant 3
 call Screen.drawCircle 3
+pop temp 0
+push local 0
+call Array.dispose 1
 pop temp 0
 push constant 0
 return
@@ -487,6 +499,9 @@ pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
+push local 0
+call Array.dispose 1
+pop temp 0
 push local 0
 return
 function Board.moveLeft 1
