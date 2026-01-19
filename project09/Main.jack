@@ -24,6 +24,8 @@ class Main {
             do g.printTie();
         }
 
+        do g.dispose();
+
         return;
     }
 }

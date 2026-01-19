@@ -179,5 +179,8 @@ push local 2
 call Game.printTie 1
 pop temp 0
 label IF_END0
+push local 2
+call Game.dispose 1
+pop temp 0
 push constant 0
 return

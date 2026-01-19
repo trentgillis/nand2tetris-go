@@ -22,6 +22,13 @@ class Board {
         return this;
     }
 
+    method void dispose() {
+        do cells.dispose();
+        do playerSelection.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
     method boolean select(int player) {
         var boolean isValid;
         var int selectedCell;

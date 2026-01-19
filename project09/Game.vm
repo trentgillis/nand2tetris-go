@@ -13,6 +13,14 @@ call Board.printBoard 1
 pop temp 0
 push pointer 0
 return
+function Game.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Board.dispose 1
+pop temp 0
+push constant 0
+return
 function Game.getGameState 0
 push argument 0
 pop pointer 0

@@ -13,6 +13,11 @@ class Game {
         return this;
     }
 
+    method void dispose() {
+        do b.dispose();
+        return;
+    }
+
     method boolean getGameState() {
         return gameState;
     }
