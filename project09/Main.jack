@@ -1,23 +1,27 @@
 class Main {
     function void main() {
+        var String gameTitle;
+        var String directions;
         var boolean keepPlaying;
         var boolean currentGameFinished;
         var Game g;
 
+        let gameTitle = "Tic-Tac-Toe!";
+        let directions = "Use the arrows to move. Press ENTER to select.";
+        do Output.moveCursor(1, (64 - gameTitle.length()) / 2);
+        do Output.printString(gameTitle);
+        do Output.moveCursor(2, (64 - directions.length()) / 2);
+        do Output.printString(directions);
+
         let keepPlaying = true;
         let currentGameFinished = false;
-        while (keepPlaying) {
-            let g = Game.new();
+        let g = Game.new();
 
-            while (~currentGameFinished) {
-                do g.nextTurn();
-                let currentGameFinished = g.getGameFinished();
-            }
-            do g.printWinner();
-
-            // TODO: update to allow choosing to end program or play again;
-            let keepPlaying = false;
+        while (~currentGameFinished) {
+            do g.nextTurn();
+            let currentGameFinished = g.getGameFinished();
         }
+        do g.printWinner();
 
         return;
     }

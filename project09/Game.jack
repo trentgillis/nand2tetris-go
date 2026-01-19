@@ -78,8 +78,9 @@ class Game {
     }
 
     method void printCurrentPlayer() {
-        do Output.moveCursor(0, 0);
-        do Output.printString("Current Player: ");
+        // Move cursor to the middle of the line for the current player text which is 18 char long
+        do Output.moveCursor(20, (64 - 18) / 2);
+        do Output.printString("Current Player - ");
         if (currentPlayer = 1) {
             do Output.printString("O");
         } else {
@@ -89,7 +90,11 @@ class Game {
     }
 
     method void printWinner() {
-        do Output.moveCursor(0, 0);
+        // Clear the current player text from row 20
+        do Output.moveCursor(20, 0);
+        do Output.printString("                                                                ");
+        // Move cursor to the middle of the line for the winner text which is 40 char long
+        do Output.moveCursor(20, (64 - 14) / 2);
         do Output.printString("Player ");
         if (currentPlayer = 1) {
             do Output.printString("O");
