@@ -2,9 +2,8 @@ class Main {
     function void main() {
         var String gameTitle;
         var String directions;
-        var boolean keepPlaying;
-        var boolean currentGameFinished;
         var Game g;
+        var int gameState;
 
         let gameTitle = "Tic-Tac-Toe!";
         let directions = "Use the arrows to move. Press ENTER to select.";
@@ -13,15 +12,17 @@ class Main {
         do Output.moveCursor(2, (64 - directions.length()) / 2);
         do Output.printString(directions);
 
-        let keepPlaying = true;
-        let currentGameFinished = false;
         let g = Game.new();
-
-        while (~currentGameFinished) {
+        let gameState = g.getGameState(); // 0 = in progress, 1 = game won, 2= game tied
+        while (gameState = 0) {
             do g.nextTurn();
-            let currentGameFinished = g.getGameFinished();
+            let gameState = g.getGameState();
         }
-        do g.printWinner();
+        if (gameState = 1) {
+            do g.printWinner();
+        } else {
+            do g.printTie();
+        }
 
         return;
     }

@@ -1,11 +1,11 @@
 class Game {
     field Board b;
     field int currentPlayer; // 1 = O, 2 = X
-    field boolean gameFinished;
+    field boolean gameState; // 0 = in progress, 1 = game won, 2 = game tied
 
     constructor Game new() {
         let currentPlayer = 1;
-        let gameFinished = false;
+        let gameState = 0;
         let b = Board.new();
 
         do b.printBoard();
@@ -13,8 +13,8 @@ class Game {
         return this;
     }
 
-    method boolean getGameFinished() {
-        return gameFinished;
+    method boolean getGameState() {
+        return gameState;
     }
 
     method void nextTurn() {
@@ -22,6 +22,7 @@ class Game {
         var boolean turnComplete;
         var boolean validSelection;
         var boolean isWin;
+        var boolean isTie;
         var char key;
 
         let isWin = false;
@@ -58,9 +59,14 @@ class Game {
                     let turnComplete = true;
                     let isWin = b.checkWin(currentPlayer);
                     if (isWin) {
-                        let gameFinished = true;
+                        let gameState = 1;
                     } else {
-                        do updatePlayer();
+                        let isTie = b.checkTie();
+                        if (isTie) {
+                            let gameState = 2;
+                        } else {
+                            do updatePlayer();
+                        }
                     }
                 }
             }
@@ -93,7 +99,7 @@ class Game {
         // Clear the current player text from row 20
         do Output.moveCursor(20, 0);
         do Output.printString("                                                                ");
-        // Move cursor to the middle of the line for the winner text which is 40 char long
+        // Move cursor to the middle of the line for the winner text which is 14 char long
         do Output.moveCursor(20, (64 - 14) / 2);
         do Output.printString("Player ");
         if (currentPlayer = 1) {
@@ -102,6 +108,16 @@ class Game {
             do Output.printString("X");
         }
         do Output.printString(" Wins!");
+        return;
+    }
+
+        method void printTie() {
+        // Clear the current player text from row 20
+        do Output.moveCursor(20, 0);
+        do Output.printString("                                                                ");
+        // Move cursor to the middle of the line for the winner text which is 10 char long
+        do Output.moveCursor(20, (64 - 10) / 2);
+        do Output.printString("Game Tied!");
         return;
     }
 

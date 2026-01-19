@@ -1,4 +1,4 @@
-function Main.main 5
+function Main.main 4
 push constant 12
 call String.new 1
 push constant 84
@@ -145,28 +145,39 @@ pop temp 0
 push local 1
 call Output.printString 1
 pop temp 0
-push constant 0
-not
-pop local 2
-push constant 0
-pop local 3
 call Game.new 0
-pop local 4
+pop local 2
+push local 2
+call Game.getGameState 1
+pop local 3
 label WHILE_EXP0
 push local 3
-not
+push constant 0
+eq
 not
 if-goto WHILE_END0
-push local 4
+push local 2
 call Game.nextTurn 1
 pop temp 0
-push local 4
-call Game.getGameFinished 1
+push local 2
+call Game.getGameState 1
 pop local 3
 goto WHILE_EXP0
 label WHILE_END0
-push local 4
+push local 3
+push constant 1
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 2
 call Game.printWinner 1
 pop temp 0
+goto IF_END0
+label IF_FALSE0
+push local 2
+call Game.printTie 1
+pop temp 0
+label IF_END0
 push constant 0
 return
