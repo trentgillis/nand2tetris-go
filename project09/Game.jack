@@ -6,9 +6,10 @@ class Game {
     constructor Game new() {
         let currentPlayer = 1;
         let gameState = 0;
-        let b = Board.new();
 
-        do b.printBoard();
+        do Board.init();
+        let b = Board.new();
+        do b.drawBoard();
 
         return this;
     }

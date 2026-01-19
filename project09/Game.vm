@@ -6,10 +6,12 @@ push constant 1
 pop this 1
 push constant 0
 pop this 2
+call Board.init 0
+pop temp 0
 call Board.new 0
 pop this 0
 push this 0
-call Board.printBoard 1
+call Board.drawBoard 1
 pop temp 0
 push pointer 0
 return

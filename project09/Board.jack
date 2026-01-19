@@ -1,9 +1,32 @@
 class Board {
+    static int BOARD_LEFT;    // 181
+    static int BOARD_TOP;     // 50
+    static int CELL_SIZE;     // 50
+    static int HALF_CELL;     // 25
+    static int EMPTY_CELL;    // -1
+    static int PLAYER_O;      // 1
+    static int PLAYER_X;      // 2
+    static int INDICATOR_R;   // 3
+    static int SYMBOL_SIZE;   // 10
+
     field Array cells;
-    field Array playerSelection;
+    field int selRow;
+    field int selCol;
+
+    function void init() {
+        let BOARD_LEFT = 181;
+        let BOARD_TOP = 50;
+        let CELL_SIZE = 50;
+        let HALF_CELL = 25;
+        let EMPTY_CELL = -1;
+        let PLAYER_O = 1;
+        let PLAYER_X = 2;
+        let INDICATOR_R = 3;
+        let SYMBOL_SIZE = 10;
+        return;
+    }
 
     constructor Board new() {
-        var Array row;
         var int i;
 
         let cells = Array.new(9);
@@ -12,19 +35,14 @@ class Board {
             let cells[i] = -1;
             let i = i + 1;
         }
-        let playerSelection = Array.new(2);
-        let i = 0;
-        while (i < 2) {
-            let playerSelection[i] = 0;
-            let i = i + 1;
-        }
+        let selRow = 0;
+        let selCol = 0;
 
         return this;
     }
 
     method void dispose() {
         do cells.dispose();
-        do playerSelection.dispose();
         do Memory.deAlloc(this);
         return;
     }
@@ -34,8 +52,8 @@ class Board {
         var int selectedCell;
 
         let isValid = false;
-        let selectedCell = getSelectedCell();
-        if (cells[selectedCell] = -1) {
+        let selectedCell = getCellIndex(selRow, selCol);
+        if (cells[selectedCell] = EMPTY_CELL) {
             let isValid = true;
             let cells[selectedCell] = player;
             do drawSelection(player);
@@ -43,7 +61,7 @@ class Board {
         return isValid;
     }
 
-    method void printBoard() {
+    method void drawBoard() {
         do Screen.setColor(true);
         // Vertical lines
         do Screen.drawLine(231, 50, 231, 200);
@@ -62,9 +80,9 @@ class Board {
             let i = i + 1;
         }
 
-        let playerSelection[0] = i / 3;
-        let playerSelection[1] = i - (playerSelection[0] * 3);
-        do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
+        let selRow = i / 3;
+        let selCol = i - (selRow * 3);
+        do drawSelectionIndicator(selRow, selCol);
         return;
     }
 
@@ -72,10 +90,10 @@ class Board {
         var Array center;
         let center = getCellCenter(row, col);
 
-        do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+        do clearSelectionIndicator(selRow, selCol);
         do Screen.setColor(true);
-        do Screen.drawLine(center[0] - 10, center[1] + 10, center[0] + 10, center[1] - 10);
-        do Screen.drawLine(center[0] + 10, center[1] + 10, center[0] - 10, center[1] - 10);
+        do Screen.drawLine(center[0] - SYMBOL_SIZE, center[1] + SYMBOL_SIZE, center[0] + SYMBOL_SIZE, center[1] - SYMBOL_SIZE);
+        do Screen.drawLine(center[0] + SYMBOL_SIZE, center[1] + SYMBOL_SIZE, center[0] - SYMBOL_SIZE, center[1] - SYMBOL_SIZE);
 
         do center.dispose();
         return;
@@ -85,13 +103,24 @@ class Board {
         var Array center;
         let center = getCellCenter(row, col);
 
-        do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
+        do clearSelectionIndicator(selRow, selCol);
         do Screen.setColor(true);
-        do Screen.drawCircle(center[0], center[1], 10);
+        do Screen.drawCircle(center[0], center[1], SYMBOL_SIZE);
         do Screen.setColor(false);
-        do Screen.drawCircle(center[0], center[1], 9);
+        do Screen.drawCircle(center[0], center[1], SYMBOL_SIZE - 1);
 
         do center.dispose();
+        return;
+    }
+
+    method void clearCurrentSelection() {
+        var int selectedCell;
+        let selectedCell = getCellIndex(selRow, selCol);
+        if (~(cells[selectedCell] = EMPTY_CELL)) {
+            do drawSelection(cells[selectedCell]);
+        } else {
+            do clearSelectionIndicator(selRow, selCol);
+        }
         return;
     }
 
@@ -100,7 +129,7 @@ class Board {
         let center = getCellCenter(row, col);
 
         do Screen.setColor(false);
-        do Screen.drawCircle(center[0], center[1], 3);
+        do Screen.drawCircle(center[0], center[1], INDICATOR_R);
 
         do center.dispose();
         return;
@@ -111,18 +140,18 @@ class Board {
         let center = getCellCenter(row, col);
 
         do Screen.setColor(true);
-        do Screen.drawCircle(center[0], center[1], 3);
+        do Screen.drawCircle(center[0], center[1], INDICATOR_R);
 
         do center.dispose();
         return;
     }
 
     method void drawSelection(int player) {
-        if (player = 1) {
-            do drawO(playerSelection[0], playerSelection[1]);
+        if (player = PLAYER_O) {
+            do drawO(selRow, selCol);
         }
-        if (player = 2) {
-            do drawX(playerSelection[0], playerSelection[1]);
+        if (player = PLAYER_X) {
+            do drawX(selRow, selCol);
         }
         return;
     }
@@ -130,78 +159,46 @@ class Board {
     method Array getCellCenter(int row, int col) {
         var Array center;
         let center = Array.new(2);
-        let center[0] = 181 + 25 + (col * 50);
-        let center[1] = 50 + 25 + (row * 50);
+        let center[0] = BOARD_LEFT + HALF_CELL + (col * CELL_SIZE);
+        let center[1] = BOARD_TOP + HALF_CELL + (row * CELL_SIZE);
 
         return center;
     }
 
     method void moveLeft() {
-        var int selectedCell;
-
-        let selectedCell = getSelectedCell();
-        if (~(playerSelection[1] = 0)) {
-            if (~(cells[selectedCell] = -1)) {
-                do drawSelection(cells[selectedCell]);
-            } else {
-                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
-            }
-            let playerSelection[1] = playerSelection[1] - 1;
-            do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
+        if (~(selCol = 0)) {
+            do clearCurrentSelection();
+            let selCol = selCol - 1;
+            do drawSelectionIndicator(selRow, selCol);
         }
         return;
     }
 
     method void moveRight() {
-        var int selectedCell;
-
-        let selectedCell = getSelectedCell();
-        if (~(playerSelection[1] = 2)) {
-            if (~(cells[selectedCell] = -1)) {
-                do drawSelection(cells[selectedCell]);
-            } else {
-                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
-            }
-            let playerSelection[1] = playerSelection[1] + 1;
-            do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
+        if (~(selCol = 2)) {
+            do clearCurrentSelection();
+            let selCol = selCol + 1;
+            do drawSelectionIndicator(selRow, selCol);
         }
         return;
     }
 
     method void moveUp() {
-        var int selectedCell;
-
-        let selectedCell = getSelectedCell();
-        if (~(playerSelection[0] = 0)) {
-            if (~(cells[selectedCell] = -1)) {
-                do drawSelection(cells[selectedCell]);
-            } else {
-                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
-            }
-            let playerSelection[0] = playerSelection[0] - 1;
-            do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
+        if (~(selRow = 0)) {
+            do clearCurrentSelection();
+            let selRow = selRow - 1;
+            do drawSelectionIndicator(selRow, selCol);
         }
         return;
     }
 
     method void moveDown() {
-        var int selectedCell;
-
-        let selectedCell = getSelectedCell();
-        if (~(playerSelection[0] = 2)) {
-            if (~(cells[selectedCell] = -1)) {
-                do drawSelection(cells[selectedCell]);
-            } else {
-                do clearSelectionIndicator(playerSelection[0], playerSelection[1]);
-            }
-            let playerSelection[0] = playerSelection[0] + 1;
-            do drawSelectionIndicator(playerSelection[0], playerSelection[1]);
+        if (~(selRow = 2)) {
+            do clearCurrentSelection();
+            let selRow = selRow + 1;
+            do drawSelectionIndicator(selRow, selCol);
         }
         return;
-    }
-
-    method int getSelectedCell() {
-        return (playerSelection[0] * 3) + playerSelection[1];
     }
 
     method int getCellIndex(int row, int col) {
@@ -213,8 +210,8 @@ class Board {
         var boolean isVerticalWin;
         var boolean isDiagonalWin;
 
-        let isHorizontalWin = checkHorizontalWin(player, playerSelection[0]);
-        let isVerticalWin = checkVerticalWin(player, playerSelection[1]);
+        let isHorizontalWin = checkHorizontalWin(player, selRow);
+        let isVerticalWin = checkVerticalWin(player, selCol);
         let isDiagonalWin = checkDiagonalWin(player);
 
         return isHorizontalWin | isVerticalWin | isDiagonalWin;
@@ -285,22 +282,16 @@ class Board {
             let rlWin = false;
         }
 
-        return lrWin | rlWin;
+        return (lrWin | rlWin);
     }
 
     method boolean checkTie() {
         var int i;
-        var boolean isTied;
 
-        let isTied = true;
         let i = 0;
-        while (i < 9) {
-            if (cells[i] = -1) {
-                let isTied = false;
-            }
+        while ((i < 9) & (~(cells[i] = -1))) {
             let i = i + 1;
         }
-
-        return isTied;
+        return (i = 9);
     }
 }
