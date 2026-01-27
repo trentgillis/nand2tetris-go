@@ -36,9 +36,10 @@ func analyzeJackFile(jackPath string) {
 	}
 
 	jt := newJackTokenizer(f, outf)
+	jt.advance()
 	for jt.hasMoreTokens {
-		jt.Advance()
-		outf.WriteString(jt.currToken + "\n")
+		jt.advance()
+		fmt.Fprintf(outf, "%s\n", jt.currToken)
 	}
 }
 
