@@ -28,7 +28,7 @@ func Translate(programPath string) {
 		vmt.translateVmFile(fPath)
 	}
 
-	// The Sys.init function handles entering an infinite loop after executionon behalf of
+	// The Sys.init function handles entering an infinite loop after execution on behalf of
 	// our program. If it is not present however, add an end of program loop manually.
 	if !vmt.shouldInit {
 		fname, _ := strings.CutSuffix(filepath.Base(vmt.asmFile.Name()), ".asm")
