@@ -28,19 +28,21 @@ func analyzeJackFile(jackPath string) {
 	defer f.Close()
 
 	dir, fileName := path.Split(jackPath)
-	outfPath := fmt.Sprintf("%s%s%s", dir, "output/", strings.Replace(fileName, ".jack", ".xml", 1))
+	outfPath := fmt.Sprintf("%s%s%s", dir, "output/", strings.Replace(fileName, ".jack", "T.xml", 1))
 	os.MkdirAll(path.Dir(outfPath), 0755)
 	outf, err := os.Create(outfPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	fmt.Fprint(outf, "<tokens>\n")
 	jt := newJackTokenizer(f, outf)
 	jt.advance()
 	for jt.hasMoreTokens {
+		jt.printTokenXML()
 		jt.advance()
-		fmt.Fprintf(outf, "%s\n", jt.currToken)
 	}
+	fmt.Fprint(outf, "</tokens>\n")
 }
 
 func getJackPaths(programPath string) []string {

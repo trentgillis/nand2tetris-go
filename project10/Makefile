@@ -16,7 +16,15 @@ clean:
 	go clean
 
 test:
-	go test -v ./...
+	./tools/TextComparer.sh ./jack/ArrayTest/MainT.xml ./jack/ArrayTest/output/MainT.xml
+	./tools/TextComparer.sh ./jack/Square/MainT.xml ./jack/Square/output/MainT.xml
+	./tools/TextComparer.sh ./jack/Square/SquareT.xml ./jack/Square/output/SquareT.xml
+	./tools/TextComparer.sh ./jack/Square/SquareGameT.xml ./jack/Square/output/SquareGameT.xml
+	./tools/TextComparer.sh ./jack/ExpressionLessSquare/SquareGameT.xml ./jack/ExpressionLessSquare/output/SquareGameT.xml
+	./tools/TextComparer.sh ./jack/ExpressionLessSquare/SquareGameT.xml ./jack/ExpressionLessSquare/output/SquareGameT.xml
+	./tools/TextComparer.sh ./jack/ExpressionLessSquare/SquareGameT.xml ./jack/ExpressionLessSquare/output/SquareGameT.xml
 
 run: build
 	./jackc ./jack/ArrayTest
+	./jackc ./jack/Square
+	./jackc ./jack/ExpressionLessSquare
