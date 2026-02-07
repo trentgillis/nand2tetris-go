@@ -185,6 +185,7 @@ func (ce *compilationEngine) compileLetStatement() {
 
 // Performs syntax analysis and outputs XML for an if statement
 // 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
+// TODO: handle expressions
 func (ce *compilationEngine) compileIfStatement() {
 	fmt.Fprintf(ce.outf, "<ifStatement>\n")
 
@@ -220,8 +221,19 @@ func (ce *compilationEngine) compileDoStatement() {
 	fmt.Fprintf(ce.outf, "</doStatement>\n")
 }
 
-// TODO
-func (ce *compilationEngine) compileReturnStatement() {}
+// Performs syntax analysis and outputs XML for a return statement
+// TODO: handle expressions
+func (ce *compilationEngine) compileReturnStatement() {
+	fmt.Fprintf(ce.outf, "<returnStatement>\n")
+
+	ce.process("return")
+	if ce.jt.currToken != ";" {
+		ce.compileIdentifier() // TODO: should be expression
+	}
+	ce.process(";")
+
+	fmt.Fprintf(ce.outf, "</returnStatement>\n")
+}
 
 // Performs syntax analysis and outputs XML for a subroutine call
 // subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
@@ -232,13 +244,24 @@ func (ce *compilationEngine) compileSubroutineCall() {
 		ce.compileIdentifier()
 	}
 	ce.process("(")
-	ce.compileExpressionList()
+	if ce.jt.currToken != ")" {
+		ce.compileExpressionList()
+	}
 	ce.process(")")
 }
 
-// TODO
+// Performs syntax analysis and outputs XML for an expression list
+// (expression (',' expression)*)?
+// TODO: handle expressions
 func (ce *compilationEngine) compileExpressionList() {
 	fmt.Fprintf(ce.outf, "<expressionList>\n")
+
+	ce.compileIdentifier() // TODO: should be expression
+	for ce.jt.currToken == "," {
+		ce.process(",")
+		ce.compileIdentifier() // TODO: should be expression
+	}
+
 	fmt.Fprintf(ce.outf, "</expressionList>\n")
 }
 
