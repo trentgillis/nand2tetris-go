@@ -173,12 +173,16 @@ func (ce *compilationEngine) compileStatements() {
 
 // Performs syntax analysis and outputs XML for a let statement
 // 'let' varName ('[' expression ']')? '=' expression ';'
-// TODO: handle expressions
 func (ce *compilationEngine) compileLetStatement() {
 	fmt.Fprintf(ce.outf, "<letStatement>\n")
 
 	ce.process("let")
-	ce.compileIdentifier() // varName; TODO: should handle array expressions
+	ce.compileIdentifier()
+	if ce.jt.currToken == "[" {
+		ce.process("[")
+		ce.compileExpression()
+		ce.process("]")
+	}
 	ce.process("=")
 	ce.compileExpression()
 	ce.process(";")
@@ -286,6 +290,10 @@ func (ce *compilationEngine) compileExpression() {
 	fmt.Fprintf(ce.outf, "<expression>\n")
 
 	ce.compileTerm()
+	for slices.Contains([]string{"+", "-", "*", "/", "&", "|", ">", "<", "="}, ce.jt.currToken) {
+		ce.compileOp()
+		ce.compileTerm()
+	}
 
 	fmt.Fprintf(ce.outf, "</expression>\n")
 }
@@ -297,9 +305,62 @@ func (ce *compilationEngine) compileExpression() {
 func (ce *compilationEngine) compileTerm() {
 	fmt.Fprintf(ce.outf, "<term>\n")
 
-	ce.compileIdentifier()
+	if ce.jt.currToken == "(" {
+		// Handle expression wrapped in parens
+		ce.process("(")
+		ce.compileExpression()
+		ce.process(")")
+	} else if len(ce.jt.lineTokens) > 0 && (ce.jt.lineTokens[0] == "." || ce.jt.lineTokens[0] == "(") {
+		// Handle subroutine call case with lookahead
+		ce.compileSubroutineCall()
+	} else if len(ce.jt.lineTokens) > 0 && ce.jt.lineTokens[0] == "[" {
+		// Handle array access with lookahead
+		ce.compileIdentifier()
+		ce.process("[")
+		ce.compileExpression()
+		ce.process("]")
+	} else if slices.Contains([]string{"-", "~"}, ce.jt.currToken) {
+		// Handle unary op term
+		ce.compileUnaryOp()
+		ce.compileTerm()
+	} else {
+		// Handle every else as an identifier. This includes all constants, keywords and varNames
+		ce.compileIdentifier()
+	}
 
 	fmt.Fprintf(ce.outf, "</term>\n")
+}
+
+func (ce *compilationEngine) compileOp() {
+	switch ce.jt.currToken {
+	case "+":
+		ce.process("+")
+	case "-":
+		ce.process("-")
+	case "*":
+		ce.process("*")
+	case "/":
+		ce.process("/")
+	case "&":
+		ce.process("&")
+	case "|":
+		ce.process("|")
+	case "<":
+		ce.process("<")
+	case ">":
+		ce.process(">")
+	case "=":
+		ce.process("=")
+	}
+}
+
+func (ce *compilationEngine) compileUnaryOp() {
+	switch ce.jt.currToken {
+	case "-":
+		ce.process("-")
+	case "~":
+		ce.process("~")
+	}
 }
 
 func (ce *compilationEngine) compileType() {
