@@ -88,6 +88,7 @@ func (jt *jackTokenizer) advance() {
 	}
 }
 
+// TODO: remove this once ce is working
 func (jt *jackTokenizer) printTokenXML() {
 	token := jt.currToken
 	tType := tokenType(jt.currToken)

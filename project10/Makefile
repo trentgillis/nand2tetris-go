@@ -25,6 +25,6 @@ test:
 	./tools/TextComparer.sh ./jack/ExpressionLessSquare/SquareGameT.xml ./jack/ExpressionLessSquare/output/SquareGameT.xml
 
 run: build
-	./jackc ./jack/ArrayTest
-	./jackc ./jack/Square
+	#./jackc ./jack/ArrayTest
+	#./jackc ./jack/Square
 	./jackc ./jack/ExpressionLessSquare
