@@ -173,25 +173,74 @@ func (ce *compilationEngine) compileStatements() {
 // TODO: handle expressions
 func (ce *compilationEngine) compileLetStatement() {
 	fmt.Fprintf(ce.outf, "<letStatement>\n")
+
 	ce.process("let")
 	ce.compileIdentifier() // varName; TODO: should handle array expressions
 	ce.process("=")
 	ce.compileIdentifier() // TODO: should be expression
 	ce.process(";")
+
 	fmt.Fprintf(ce.outf, "</letStatement>\n")
 }
 
-// TODO
-func (ce *compilationEngine) compileIfStatement() {}
+// Performs syntax analysis and outputs XML for an if statement
+// 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
+func (ce *compilationEngine) compileIfStatement() {
+	fmt.Fprintf(ce.outf, "<ifStatement>\n")
+
+	ce.process("if")
+	ce.process("(")
+	ce.compileIdentifier() // TODO: should be expression
+	ce.process(")")
+	ce.process("{")
+	ce.compileStatements()
+	ce.process("}")
+	if ce.jt.currToken == "else" {
+		ce.process("else")
+		ce.process("{")
+		ce.compileStatements()
+		ce.process("}")
+	}
+
+	fmt.Fprintf(ce.outf, "</ifStatement>\n")
+}
 
 // TODO
 func (ce *compilationEngine) compileWhileStatement() {}
 
-// TODO
-func (ce *compilationEngine) compileDoStatement() {}
+// Performs syntax analysis and outputs XML for a do statement
+// 'do' subroutineCall ';'
+func (ce *compilationEngine) compileDoStatement() {
+	fmt.Fprintf(ce.outf, "<doStatement>\n")
+
+	ce.process("do")
+	ce.compileSubroutineCall()
+	ce.process(";")
+
+	fmt.Fprintf(ce.outf, "</doStatement>\n")
+}
 
 // TODO
 func (ce *compilationEngine) compileReturnStatement() {}
+
+// Performs syntax analysis and outputs XML for a subroutine call
+// subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
+func (ce *compilationEngine) compileSubroutineCall() {
+	ce.compileIdentifier()
+	if ce.jt.currToken == "." {
+		ce.process(".")
+		ce.compileIdentifier()
+	}
+	ce.process("(")
+	ce.compileExpressionList()
+	ce.process(")")
+}
+
+// TODO
+func (ce *compilationEngine) compileExpressionList() {
+	fmt.Fprintf(ce.outf, "<expressionList>\n")
+	fmt.Fprintf(ce.outf, "</expressionList>\n")
+}
 
 func (ce *compilationEngine) compileType() {
 	switch ce.jt.currToken {
