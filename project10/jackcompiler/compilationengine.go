@@ -133,8 +133,9 @@ func (ce *compilationEngine) compileSubroutineBody() {
 
 // Performs syntax analysis and outputs XML for variable declarations in a subroutine body
 // 'var' type varName (',' type varName)* ';'
-// TODO: add support for expressions
 func (ce *compilationEngine) compileVarDec() {
+	fmt.Fprintf(ce.outf, "<varDec>\n")
+
 	ce.process("var")
 	ce.compileType()
 	ce.compileIdentifier()
@@ -143,6 +144,8 @@ func (ce *compilationEngine) compileVarDec() {
 		ce.compileIdentifier()
 	}
 	ce.process(";")
+
+	fmt.Fprintf(ce.outf, "</varDec>\n")
 }
 
 // Performs syntax analysis and outputs XML for one or more statements
@@ -177,7 +180,7 @@ func (ce *compilationEngine) compileLetStatement() {
 	ce.process("let")
 	ce.compileIdentifier() // varName; TODO: should handle array expressions
 	ce.process("=")
-	ce.compileIdentifier() // TODO: should be expression
+	ce.compileExpression()
 	ce.process(";")
 
 	fmt.Fprintf(ce.outf, "</letStatement>\n")
@@ -185,13 +188,12 @@ func (ce *compilationEngine) compileLetStatement() {
 
 // Performs syntax analysis and outputs XML for an if statement
 // 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
-// TODO: handle expressions
 func (ce *compilationEngine) compileIfStatement() {
 	fmt.Fprintf(ce.outf, "<ifStatement>\n")
 
 	ce.process("if")
 	ce.process("(")
-	ce.compileIdentifier() // TODO: should be expression
+	ce.compileExpression()
 	ce.process(")")
 	ce.process("{")
 	ce.compileStatements()
@@ -208,13 +210,12 @@ func (ce *compilationEngine) compileIfStatement() {
 
 // Performs syntax analysis and outputs XML for a while statement
 // 'while' '(' expression ')' '{' statements '}'
-// TODO: handle expressions
 func (ce *compilationEngine) compileWhileStatement() {
 	fmt.Fprintf(ce.outf, "<whileStatement>\n")
 
 	ce.process("while")
 	ce.process("(")
-	ce.compileIdentifier() // TODO: should be expression
+	ce.compileExpression()
 	ce.process(")")
 	ce.process("{")
 	ce.compileStatements()
@@ -236,13 +237,13 @@ func (ce *compilationEngine) compileDoStatement() {
 }
 
 // Performs syntax analysis and outputs XML for a return statement
-// TODO: handle expressions
+// 'return' expression? ';'
 func (ce *compilationEngine) compileReturnStatement() {
 	fmt.Fprintf(ce.outf, "<returnStatement>\n")
 
 	ce.process("return")
 	if ce.jt.currToken != ";" {
-		ce.compileIdentifier() // TODO: should be expression
+		ce.compileExpression()
 	}
 	ce.process(";")
 
@@ -258,25 +259,47 @@ func (ce *compilationEngine) compileSubroutineCall() {
 		ce.compileIdentifier()
 	}
 	ce.process("(")
-	if ce.jt.currToken != ")" {
-		ce.compileExpressionList()
-	}
+	ce.compileExpressionList()
 	ce.process(")")
 }
 
 // Performs syntax analysis and outputs XML for an expression list
 // (expression (',' expression)*)?
-// TODO: handle expressions
 func (ce *compilationEngine) compileExpressionList() {
 	fmt.Fprintf(ce.outf, "<expressionList>\n")
 
-	ce.compileIdentifier() // TODO: should be expression
-	for ce.jt.currToken == "," {
-		ce.process(",")
-		ce.compileIdentifier() // TODO: should be expression
+	if ce.jt.currToken != ")" {
+		ce.compileExpression()
+		for ce.jt.currToken == "," {
+			ce.process(",")
+			ce.compileExpression()
+		}
 	}
 
 	fmt.Fprintf(ce.outf, "</expressionList>\n")
+}
+
+// Performs syntax analysis and outputs XML for an expression
+// term (op term)*
+// TODO: handle expressions
+func (ce *compilationEngine) compileExpression() {
+	fmt.Fprintf(ce.outf, "<expression>\n")
+
+	ce.compileTerm()
+
+	fmt.Fprintf(ce.outf, "</expression>\n")
+}
+
+// Performs syntax analysis and outputs XML for an term
+// integerConstant | stringConstant | keywordConstant | varName | varName'[' expression ']' |
+// '(' expression ')' | (unaryOp term) | subroutineCall
+// TODO: handle terms
+func (ce *compilationEngine) compileTerm() {
+	fmt.Fprintf(ce.outf, "<term>\n")
+
+	ce.compileIdentifier()
+
+	fmt.Fprintf(ce.outf, "</term>\n")
 }
 
 func (ce *compilationEngine) compileType() {

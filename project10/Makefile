@@ -20,9 +20,12 @@ test:
 	./tools/TextComparer.sh ./jack/Square/MainT.xml ./jack/Square/output/MainT.xml
 	./tools/TextComparer.sh ./jack/Square/SquareT.xml ./jack/Square/output/SquareT.xml
 	./tools/TextComparer.sh ./jack/Square/SquareGameT.xml ./jack/Square/output/SquareGameT.xml
+	./tools/TextComparer.sh ./jack/ExpressionLessSquare/MainT.xml ./jack/ExpressionLessSquare/output/MainT.xml
+	./tools/TextComparer.sh ./jack/ExpressionLessSquare/SquareT.xml ./jack/ExpressionLessSquare/output/SquareT.xml
 	./tools/TextComparer.sh ./jack/ExpressionLessSquare/SquareGameT.xml ./jack/ExpressionLessSquare/output/SquareGameT.xml
-	./tools/TextComparer.sh ./jack/ExpressionLessSquare/SquareGameT.xml ./jack/ExpressionLessSquare/output/SquareGameT.xml
-	./tools/TextComparer.sh ./jack/ExpressionLessSquare/SquareGameT.xml ./jack/ExpressionLessSquare/output/SquareGameT.xml
+	./tools/TextComparer.sh ./jack/ExpressionLessSquare/Main.xml ./jack/ExpressionLessSquare/output/Main.xml
+	./tools/TextComparer.sh ./jack/ExpressionLessSquare/Square.xml ./jack/ExpressionLessSquare/output/Square.xml
+	./tools/TextComparer.sh ./jack/ExpressionLessSquare/SquareGame.xml ./jack/ExpressionLessSquare/output/SquareGame.xml
 
 run: build
 	#./jackc ./jack/ArrayTest
