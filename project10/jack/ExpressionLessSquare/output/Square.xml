@@ -32,4 +32,5 @@
 <identifier> Asize </identifier>
 </parameterList>
 <symbol> ) </symbol>
-</subroutineDec>
+<subroutineBody>
+<symbol> { </symbol>

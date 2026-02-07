@@ -16,4 +16,17 @@
 <parameterList>
 </parameterList>
 <symbol> ) </symbol>
-</subroutineDec>
+<subroutineBody>
+<symbol> { </symbol>
+<keyword> var </keyword>
+<identifier> SquareGame </identifier>
+<identifier> game </identifier>
+<symbol> ; </symbol>
+<statements>
+<letStatement>
+<keyword> let </keyword>
+<identifier> game </identifier>
+<symbol> = </symbol>
+<identifier> game </identifier>
+<symbol> ; </symbol>
+</letStatement>

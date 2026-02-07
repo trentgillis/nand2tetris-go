@@ -95,6 +95,7 @@ func (ce *compilationEngine) compileSubroutine() {
 	ce.process("(")
 	ce.compileParameterList()
 	ce.process(")")
+	ce.compileSubroutineBody()
 
 	fmt.Fprintf(ce.outf, "</subroutineDec>\n")
 }
@@ -115,10 +116,82 @@ func (ce *compilationEngine) compileParameterList() {
 	fmt.Fprintf(ce.outf, "</parameterList>\n")
 }
 
+// Performs syntax analysis and outputs XML for subroutine bodies
+// '{' varDec* statements '}'
 func (ce *compilationEngine) compileSubroutineBody() {
 	fmt.Fprintf(ce.outf, "<subroutineBody>\n")
+
+	ce.process("{")
+	for ce.jt.currToken == "var" {
+		ce.compileVarDec()
+	}
+	ce.compileStatements()
+	ce.process("}")
+
 	fmt.Fprintf(ce.outf, "</subroutineBody>\n")
 }
+
+// Performs syntax analysis and outputs XML for variable declarations in a subroutine body
+// 'var' type varName (',' type varName)* ';'
+// TODO: add support for expressions
+func (ce *compilationEngine) compileVarDec() {
+	ce.process("var")
+	ce.compileType()
+	ce.compileIdentifier()
+	for ce.jt.currToken == "," {
+		ce.process(",")
+		ce.compileIdentifier()
+	}
+	ce.process(";")
+}
+
+// Performs syntax analysis and outputs XML for one or more statements
+// (letStatement | ifStatement | whileStatement | doStatement | returnStatement)*
+func (ce *compilationEngine) compileStatements() {
+	fmt.Fprintf(ce.outf, "<statements>\n")
+	for slices.Contains([]string{"let", "if", "while", "do", "return"}, ce.jt.currToken) {
+		switch ce.jt.currToken {
+		case "let":
+			ce.compileLetStatement()
+		case "if":
+			ce.compileIfStatement()
+		case "while":
+			ce.compileWhileStatement()
+		case "do":
+			ce.compileDoStatement()
+		case "return":
+			ce.compileReturnStatement()
+		default:
+			log.Fatalf("Syntax error at token %s. Expected: let, if, while, do or return", ce.jt.currToken)
+		}
+	}
+	fmt.Fprintf(ce.outf, "</statements>\n")
+}
+
+// Performs syntax analysis and outputs XML for a let statement
+// 'let' varName ('[' expression ']')? '=' expression ';'
+// TODO: handle expressions
+func (ce *compilationEngine) compileLetStatement() {
+	fmt.Fprintf(ce.outf, "<letStatement>\n")
+	ce.process("let")
+	ce.compileIdentifier() // varName; TODO: should handle array expressions
+	ce.process("=")
+	ce.compileIdentifier() // TODO: should be expression
+	ce.process(";")
+	fmt.Fprintf(ce.outf, "</letStatement>\n")
+}
+
+// TODO
+func (ce *compilationEngine) compileIfStatement() {}
+
+// TODO
+func (ce *compilationEngine) compileWhileStatement() {}
+
+// TODO
+func (ce *compilationEngine) compileDoStatement() {}
+
+// TODO
+func (ce *compilationEngine) compileReturnStatement() {}
 
 func (ce *compilationEngine) compileType() {
 	switch ce.jt.currToken {
