@@ -206,8 +206,22 @@ func (ce *compilationEngine) compileIfStatement() {
 	fmt.Fprintf(ce.outf, "</ifStatement>\n")
 }
 
-// TODO
-func (ce *compilationEngine) compileWhileStatement() {}
+// Performs syntax analysis and outputs XML for a while statement
+// 'while' '(' expression ')' '{' statements '}'
+// TODO: handle expressions
+func (ce *compilationEngine) compileWhileStatement() {
+	fmt.Fprintf(ce.outf, "<whileStatement>\n")
+
+	ce.process("while")
+	ce.process("(")
+	ce.compileIdentifier() // TODO: should be expression
+	ce.process(")")
+	ce.process("{")
+	ce.compileStatements()
+	ce.process("}")
+
+	fmt.Fprintf(ce.outf, "</whileStatement>\n")
+}
 
 // Performs syntax analysis and outputs XML for a do statement
 // 'do' subroutineCall ';'
