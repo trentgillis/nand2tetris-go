@@ -5,12 +5,9 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
-
-type jackAnalyzer struct {
-	jackFilePaths []string
-}
 
 func Analyze(programPath string) {
 	jackPaths := getJackPaths(programPath)
@@ -28,12 +25,17 @@ func analyzeJackFile(jackPath string) {
 	defer f.Close()
 
 	dir, fileName := path.Split(jackPath)
-	outfPath := fmt.Sprintf("%s%s%s", dir, "output/", strings.Replace(fileName, ".jack", ".xml", 1))
-	os.MkdirAll(path.Dir(outfPath), 0755)
+	outfPath := filepath.Join(dir, "output/", strings.Replace(fileName, ".jack", ".xml", 1))
+	err = os.MkdirAll(path.Dir(outfPath), 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	outf, err := os.Create(outfPath)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer outf.Close()
 
 	ce := newCompilationEngine(f, outf)
 	ce.compileClass()

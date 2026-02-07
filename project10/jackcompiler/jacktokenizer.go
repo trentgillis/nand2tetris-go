@@ -17,6 +17,9 @@ const (
 	TOKEN_STRING_CONST = "stringConstant"
 )
 
+var LINE_REGEX = regexp.MustCompile(`({|}|\(|\)|\[|\]|\.|,|;|\+|-|\*|/|&|\||<|>|=|~)`)
+var INT_REGEX = regexp.MustCompile(`^[0-9]+`)
+
 var JACK_SYMBOLS = map[string]string{
 	"{": "{",
 	"}": "}",
@@ -88,7 +91,6 @@ func (jt *jackTokenizer) advance() {
 	}
 }
 
-// TODO: remove this once ce is working
 func (jt *jackTokenizer) printTokenXML() {
 	token := jt.currToken
 	tType := tokenType(jt.currToken)
@@ -117,8 +119,7 @@ func tokenType(token string) string {
 		return TOKEN_STRING_CONST
 	}
 
-	intRegex := regexp.MustCompile(`[0-9]+`)
-	if intRegex.MatchString(token) {
+	if INT_REGEX.MatchString(token) {
 		return TOKEN_INT_CONST
 	}
 
@@ -180,9 +181,8 @@ func (jt *jackTokenizer) nextLine() {
 
 func getLineTokens(line string) []string {
 	lineTokens := []string{}
-	re := regexp.MustCompile(`({|}|\(|\)|\[|\]|\.|,|;|\+|-|\*|/|&|\||<|>|=|~)`)
 
-	for l := range strings.SplitSeq(re.ReplaceAllString(line, " $1 "), " ") {
+	for l := range strings.SplitSeq(LINE_REGEX.ReplaceAllString(line, " $1 "), " ") {
 		if len(l) > 0 {
 			lineTokens = append(lineTokens, strings.TrimSpace(l))
 		}

@@ -35,7 +35,7 @@ func (ce *compilationEngine) compileClass() {
 	fmt.Fprintf(ce.outf, "<class>\n")
 
 	ce.process("class")
-	ce.compileIdentifier() // className
+	ce.compileCurrentToken() // className
 	ce.process("{")
 	for slices.Contains([]string{"static", "field"}, ce.jt.currToken) {
 		ce.compileClassVarDec()
@@ -62,11 +62,11 @@ func (ce *compilationEngine) compileClassVarDec() {
 		log.Fatalf("Syntax error at token %s. Expected: static or field", ce.jt.currToken)
 	}
 
-	ce.compileType()       // type
-	ce.compileIdentifier() // varName
+	ce.compileType()         // type
+	ce.compileCurrentToken() // varName
 	for ce.jt.currToken == "," {
 		ce.process(",")
-		ce.compileIdentifier() // varName
+		ce.compileCurrentToken() // varName
 	}
 	ce.process(";")
 
@@ -86,12 +86,11 @@ func (ce *compilationEngine) compileSubroutine() {
 	case "function":
 		ce.process("function")
 	default:
-		// TODO: log fatal
 		log.Fatalf("Syntax error at token %s. Expected: constructor, method or function", ce.jt.currToken)
 	}
 
 	ce.compileType()
-	ce.compileIdentifier() // subroutineName
+	ce.compileCurrentToken() // subroutineName
 	ce.process("(")
 	ce.compileParameterList()
 	ce.process(")")
@@ -107,7 +106,7 @@ func (ce *compilationEngine) compileParameterList() {
 
 	for ce.jt.currToken != ")" {
 		ce.compileType()
-		ce.compileIdentifier()
+		ce.compileCurrentToken()
 		if ce.jt.currToken == "," {
 			ce.process(",")
 		}
@@ -138,10 +137,10 @@ func (ce *compilationEngine) compileVarDec() {
 
 	ce.process("var")
 	ce.compileType()
-	ce.compileIdentifier()
+	ce.compileCurrentToken()
 	for ce.jt.currToken == "," {
 		ce.process(",")
-		ce.compileIdentifier()
+		ce.compileCurrentToken()
 	}
 	ce.process(";")
 
@@ -177,7 +176,7 @@ func (ce *compilationEngine) compileLetStatement() {
 	fmt.Fprintf(ce.outf, "<letStatement>\n")
 
 	ce.process("let")
-	ce.compileIdentifier()
+	ce.compileCurrentToken()
 	if ce.jt.currToken == "[" {
 		ce.process("[")
 		ce.compileExpression()
@@ -257,10 +256,10 @@ func (ce *compilationEngine) compileReturnStatement() {
 // Performs syntax analysis and outputs XML for a subroutine call
 // subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
 func (ce *compilationEngine) compileSubroutineCall() {
-	ce.compileIdentifier()
+	ce.compileCurrentToken()
 	if ce.jt.currToken == "." {
 		ce.process(".")
-		ce.compileIdentifier()
+		ce.compileCurrentToken()
 	}
 	ce.process("(")
 	ce.compileExpressionList()
@@ -285,7 +284,6 @@ func (ce *compilationEngine) compileExpressionList() {
 
 // Performs syntax analysis and outputs XML for an expression
 // term (op term)*
-// TODO: handle expressions
 func (ce *compilationEngine) compileExpression() {
 	fmt.Fprintf(ce.outf, "<expression>\n")
 
@@ -301,7 +299,6 @@ func (ce *compilationEngine) compileExpression() {
 // Performs syntax analysis and outputs XML for an term
 // integerConstant | stringConstant | keywordConstant | varName | varName'[' expression ']' |
 // '(' expression ')' | (unaryOp term) | subroutineCall
-// TODO: handle terms
 func (ce *compilationEngine) compileTerm() {
 	fmt.Fprintf(ce.outf, "<term>\n")
 
@@ -315,7 +312,7 @@ func (ce *compilationEngine) compileTerm() {
 		ce.compileSubroutineCall()
 	} else if len(ce.jt.lineTokens) > 0 && ce.jt.lineTokens[0] == "[" {
 		// Handle array access with lookahead
-		ce.compileIdentifier()
+		ce.compileCurrentToken()
 		ce.process("[")
 		ce.compileExpression()
 		ce.process("]")
@@ -325,46 +322,24 @@ func (ce *compilationEngine) compileTerm() {
 		ce.compileTerm()
 	} else {
 		// Handle every else as an identifier. This includes all constants, keywords and varNames
-		ce.compileIdentifier()
+		ce.compileCurrentToken()
 	}
 
 	fmt.Fprintf(ce.outf, "</term>\n")
 }
 
 func (ce *compilationEngine) compileOp() {
-	switch ce.jt.currToken {
-	case "+":
-		ce.process("+")
-	case "-":
-		ce.process("-")
-	case "*":
-		ce.process("*")
-	case "/":
-		ce.process("/")
-	case "&":
-		ce.process("&")
-	case "|":
-		ce.process("|")
-	case "<":
-		ce.process("<")
-	case ">":
-		ce.process(">")
-	case "=":
-		ce.process("=")
-	}
+	ce.process(ce.jt.currToken)
 }
 
 func (ce *compilationEngine) compileUnaryOp() {
-	switch ce.jt.currToken {
-	case "-":
-		ce.process("-")
-	case "~":
-		ce.process("~")
-	}
+	ce.process(ce.jt.currToken)
 }
 
 func (ce *compilationEngine) compileType() {
 	switch ce.jt.currToken {
+	case "void":
+		ce.process("void")
 	case "int":
 		ce.process("int")
 	case "char":
@@ -372,11 +347,12 @@ func (ce *compilationEngine) compileType() {
 	case "boolean":
 		ce.process("boolean")
 	default:
-		ce.compileIdentifier()
+		// Type is a className
+		ce.compileCurrentToken()
 	}
 }
 
-func (ce *compilationEngine) compileIdentifier() {
+func (ce *compilationEngine) compileCurrentToken() {
 	ce.jt.printTokenXML()
 	ce.jt.advance()
 }
