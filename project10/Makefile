@@ -27,4 +27,4 @@ test:
 run: build
 	#./jackc ./jack/ArrayTest
 	#./jackc ./jack/Square
-	./jackc ./jack/ExpressionLessSquare
+	./jackc ./jack/ExpressionLessSquare/Square.jack
