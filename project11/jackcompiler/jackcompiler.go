@@ -9,15 +9,15 @@ import (
 	"strings"
 )
 
-func Analyze(programPath string) {
+func Compile(programPath string) {
 	jackPaths := getJackPaths(programPath)
 
 	for _, path := range jackPaths {
-		analyzeJackFile(path)
+		compileJackFile(path)
 	}
 }
 
-func analyzeJackFile(jackPath string) {
+func compileJackFile(jackPath string) {
 	f, err := os.Open(jackPath)
 	if err != nil {
 		log.Fatal(err)

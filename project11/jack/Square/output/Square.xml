@@ -3,17 +3,28 @@
 <identifier> Square </identifier>
 <symbol> { </symbol>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> x </identifier>
+<identifier>
+<name> x </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> y </identifier>
+<identifier>
+<name> y </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 1 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> size </identifier>
+<identifier>
+<name> size </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 2 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <subroutineDec>

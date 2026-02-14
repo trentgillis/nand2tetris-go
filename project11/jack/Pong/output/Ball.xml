@@ -3,57 +3,120 @@
 <identifier> Ball </identifier>
 <symbol> { </symbol>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> x </identifier>
+<identifier>
+<name> x </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> y </identifier>
+<identifier>
+<name> y </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 1 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> lengthx </identifier>
+<identifier>
+<name> lengthx </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 2 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> lengthy </identifier>
+<identifier>
+<name> lengthy </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 3 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> d </identifier>
+<identifier>
+<name> d </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 4 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> straightD </identifier>
+<identifier>
+<name> straightD </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 5 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> diagonalD </identifier>
+<identifier>
+<name> diagonalD </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 6 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> boolean </keyword>
-<identifier> invert </identifier>
+<identifier>
+<name> invert </name>
+<dataType> boolean </dataType>
+<kind> field </kind>
+<index> 7 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> positivex </identifier>
+<identifier>
+<name> positivex </name>
+<dataType> boolean </dataType>
+<kind> field </kind>
+<index> 8 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> positivey </identifier>
+<identifier>
+<name> positivey </name>
+<dataType> boolean </dataType>
+<kind> field </kind>
+<index> 9 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> leftWall </identifier>
+<identifier>
+<name> leftWall </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 10 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> rightWall </identifier>
+<identifier>
+<name> rightWall </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 11 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> topWall </identifier>
+<identifier>
+<name> topWall </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 12 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> bottomWall </identifier>
+<identifier>
+<name> bottomWall </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 13 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> wall </identifier>
+<identifier>
+<name> wall </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 14 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <subroutineDec>

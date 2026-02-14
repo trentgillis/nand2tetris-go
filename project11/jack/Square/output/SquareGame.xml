@@ -3,15 +3,21 @@
 <identifier> SquareGame </identifier>
 <symbol> { </symbol>
 <classVarDec>
-<keyword> field </keyword>
-<identifier> Square </identifier>
-<identifier> square </identifier>
+<identifier>
+<name> square </name>
+<dataType> Square </dataType>
+<kind> field </kind>
+<index> 0 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> direction </identifier>
+<identifier>
+<name> direction </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 1 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <subroutineDec>

@@ -11,5 +11,5 @@ func main() {
 		log.Fatal("Path to jack file or program directory was not provided")
 	}
 	programPath := os.Args[1]
-	jackcompiler.Analyze(programPath)
+	jackcompiler.Compile(programPath)
 }

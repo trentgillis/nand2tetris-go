@@ -8,27 +8,28 @@ import (
 )
 
 type compilationEngine struct {
-	jt   jackTokenizer
-	inf  *os.File
-	outf *os.File
+	jt        jackTokenizer
+	classSt   symbolTable
+	routineSt symbolTable
+	inf       *os.File
+	outf      *os.File
 }
 
 func newCompilationEngine(inf *os.File, outf *os.File) compilationEngine {
+	classSt := newSymbolTable()
 	jt := newJackTokenizer(inf, outf)
 	jt.advance() // move to the first token
-	return compilationEngine{inf: inf, outf: outf, jt: jt}
+	return compilationEngine{inf: inf, outf: outf, jt: jt, classSt: classSt}
 }
 
 func (ce *compilationEngine) process(token string) {
 	if ce.jt.currToken != token {
 		log.Fatalf("Syntax error at token: %s. Expected: %s\n", ce.jt.currToken, token)
 	}
-
-	ce.jt.printTokenXML()
-	ce.jt.advance()
+	ce.compileCurrentToken()
 }
 
-// Performs syntax analysis and outputs XML for class declaration. Entrypoint function for the
+// Performs syntax analysis and outputs XML class declaration. Entrypoint function for the
 // compilation engine and should be called first to begin recursive descent of Jack programs
 // 'class' className '{' classVarDec* subroutineDec* '}'
 func (ce *compilationEngine) compileClass() {
@@ -53,22 +54,48 @@ func (ce *compilationEngine) compileClass() {
 func (ce *compilationEngine) compileClassVarDec() {
 	fmt.Fprintf(ce.outf, "<classVarDec>\n")
 
+	stEntry := stEntry{}
+
 	switch ce.jt.currToken {
 	case "static":
-		ce.process("static")
+		stEntry.index = ce.classSt.staticCount
+		stEntry.kind = "static"
+		ce.jt.advance()
 	case "field":
-		ce.process("field")
+		stEntry.index = ce.classSt.fieldCount
+		stEntry.kind = "field"
+		ce.jt.advance()
 	default:
 		log.Fatalf("Syntax error at token %s. Expected: static or field", ce.jt.currToken)
 	}
 
-	ce.compileType()         // type
-	ce.compileCurrentToken() // varName
+	stEntry.dataType = ce.jt.currToken
+	ce.jt.advance()
+	stEntry.name = ce.jt.currToken
+	ce.jt.advance()
+	ce.classSt.table[stEntry.name] = stEntry
+	// TODO: temp
+	ce.printFromSt(stEntry.name)
+
 	for ce.jt.currToken == "," {
 		ce.process(",")
-		ce.compileCurrentToken() // varName
+
+		stEntry.name = ce.jt.currToken
+		stEntry.index += 1
+		ce.jt.advance()
+
+		ce.classSt.table[stEntry.name] = stEntry
+		// TODO: temp
+		ce.printFromSt(stEntry.name)
 	}
 	ce.process(";")
+
+	if stEntry.kind == "static" {
+		ce.classSt.staticCount = stEntry.index + 1
+	}
+	if stEntry.kind == "field" {
+		ce.classSt.fieldCount = stEntry.index + 1
+	}
 
 	fmt.Fprintf(ce.outf, "</classVarDec>\n")
 }
@@ -350,6 +377,15 @@ func (ce *compilationEngine) compileType() {
 		// Type is a className
 		ce.compileCurrentToken()
 	}
+}
+
+func (ce *compilationEngine) printFromSt(identifier string) {
+	fmt.Fprintf(ce.outf, "<identifier>\n")
+	fmt.Fprintf(ce.outf, "<name> %s </name>\n", ce.classSt.table[identifier].name)
+	fmt.Fprintf(ce.outf, "<dataType> %s </dataType>\n", ce.classSt.table[identifier].dataType)
+	fmt.Fprintf(ce.outf, "<kind> %s </kind>\n", ce.classSt.table[identifier].kind)
+	fmt.Fprintf(ce.outf, "<index> %d </index>\n", ce.classSt.table[identifier].index)
+	fmt.Fprintf(ce.outf, "</identifier>\n")
 }
 
 func (ce *compilationEngine) compileCurrentToken() {

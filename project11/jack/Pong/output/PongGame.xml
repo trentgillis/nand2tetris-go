@@ -3,51 +3,75 @@
 <identifier> PongGame </identifier>
 <symbol> { </symbol>
 <classVarDec>
-<keyword> static </keyword>
-<identifier> PongGame </identifier>
-<identifier> instance </identifier>
+<identifier>
+<name> instance </name>
+<dataType> PongGame </dataType>
+<kind> static </kind>
+<index> 0 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<identifier> Bat </identifier>
-<identifier> bat </identifier>
+<identifier>
+<name> bat </name>
+<dataType> Bat </dataType>
+<kind> field </kind>
+<index> 0 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<identifier> Ball </identifier>
-<identifier> ball </identifier>
+<identifier>
+<name> ball </name>
+<dataType> Ball </dataType>
+<kind> field </kind>
+<index> 1 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> wall </identifier>
+<identifier>
+<name> wall </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 2 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> boolean </keyword>
-<identifier> exit </identifier>
+<identifier>
+<name> exit </name>
+<dataType> boolean </dataType>
+<kind> field </kind>
+<index> 3 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> score </identifier>
+<identifier>
+<name> score </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 4 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> lastWall </identifier>
+<identifier>
+<name> lastWall </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 5 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> batWidth </identifier>
+<identifier>
+<name> batWidth </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 6 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <subroutineDec>

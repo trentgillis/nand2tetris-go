@@ -3,25 +3,44 @@
 <identifier> Bat </identifier>
 <symbol> { </symbol>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> x </identifier>
+<identifier>
+<name> x </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> y </identifier>
+<identifier>
+<name> y </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 1 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> width </identifier>
+<identifier>
+<name> width </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 2 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> height </identifier>
+<identifier>
+<name> height </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 3 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <classVarDec>
-<keyword> field </keyword>
-<keyword> int </keyword>
-<identifier> direction </identifier>
+<identifier>
+<name> direction </name>
+<dataType> int </dataType>
+<kind> field </kind>
+<index> 4 </index>
+</identifier>
 <symbol> ; </symbol>
 </classVarDec>
 <subroutineDec>
