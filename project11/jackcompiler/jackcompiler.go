@@ -25,7 +25,7 @@ func compileJackFile(jackPath string) {
 	defer f.Close()
 
 	dir, fileName := path.Split(jackPath)
-	outfPath := filepath.Join(dir, "output/", strings.Replace(fileName, ".jack", ".xml", 1))
+	outfPath := filepath.Join(dir, "output/", strings.Replace(fileName, ".jack", ".vm", 1))
 	err = os.MkdirAll(path.Dir(outfPath), 0755)
 	if err != nil {
 		log.Fatal(err)

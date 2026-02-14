@@ -1,0 +1,6 @@
+function Main.main 0
+<identifier> Output </identifier>
+<identifier> printInt </identifier>
+<integerConstant> 1 </integerConstant>
+<integerConstant> 2 </integerConstant>
+<integerConstant> 3 </integerConstant>

@@ -16,12 +16,12 @@ clean:
 	go clean
 
 test:
-	./tools/TextComparer.sh ./jack/Seven/Main.vm ./jack/ArrayTest/output/Main.vm
+	./tools/TextComparer.sh ./jack/Seven/Main.vm ./jack/Seven/output/Main.vm
 
 run: build
-	./jackc ./jack/Average
-	./jackc ./jack/ComplexArrays
-	./jackc ./jack/ConvertToBin
-	./jackc ./jack/Pong
+	# ./jackc ./jack/Average
+	# ./jackc ./jack/ComplexArrays
+	# ./jackc ./jack/ConvertToBin
+	# ./jackc ./jack/Pong
 	./jackc ./jack/Seven
-	./jackc ./jack/Square
+	# ./jackc ./jack/Square
