@@ -13,9 +13,12 @@
 <subroutineBody>
 <symbol> { </symbol>
 <varDec>
-<keyword> var </keyword>
-<identifier> SquareGame </identifier>
-<identifier> game </identifier>
+<identifier>
+<name> game </name>
+<dataType> SquareGame </dataType>
+<kind> var </kind>
+<index> 0 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <statements>

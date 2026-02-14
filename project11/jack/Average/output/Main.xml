@@ -13,23 +13,37 @@
 <subroutineBody>
 <symbol> { </symbol>
 <varDec>
-<keyword> var </keyword>
-<identifier> Array </identifier>
-<identifier> a </identifier>
+<identifier>
+<name> a </name>
+<dataType> Array </dataType>
+<kind> var </kind>
+<index> 0 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <varDec>
-<keyword> var </keyword>
-<keyword> int </keyword>
-<identifier> length </identifier>
+<identifier>
+<name> length </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 1 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <varDec>
-<keyword> var </keyword>
-<keyword> int </keyword>
-<identifier> i </identifier>
+<identifier>
+<name> i </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 2 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> sum </identifier>
+<identifier>
+<name> sum </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 3 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <statements>

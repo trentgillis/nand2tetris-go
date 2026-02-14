@@ -478,9 +478,12 @@
 <subroutineBody>
 <symbol> { </symbol>
 <varDec>
-<keyword> var </keyword>
-<keyword> char </keyword>
-<identifier> key </identifier>
+<identifier>
+<name> key </name>
+<dataType> char </dataType>
+<kind> var </kind>
+<index> 0 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <statements>
@@ -868,17 +871,40 @@
 <subroutineBody>
 <symbol> { </symbol>
 <varDec>
-<keyword> var </keyword>
-<keyword> int </keyword>
-<identifier> bouncingDirection </identifier>
+<identifier>
+<name> bouncingDirection </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> batLeft </identifier>
+<identifier>
+<name> batLeft </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 1 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> batRight </identifier>
+<identifier>
+<name> batRight </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 2 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> ballLeft </identifier>
+<identifier>
+<name> ballLeft </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 3 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> ballRight </identifier>
+<identifier>
+<name> ballRight </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 4 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <statements>

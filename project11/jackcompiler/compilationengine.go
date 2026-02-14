@@ -147,6 +147,7 @@ func (ce *compilationEngine) compileParameterList() {
 		stEntry.name = ce.jt.currToken
 		ce.jt.advance()
 		ce.routineSt.table[stEntry.name] = stEntry
+		// TODO: remove
 		ce.printFromSt(ce.routineSt, stEntry.name)
 
 		if ce.jt.currToken == "," {
@@ -178,14 +179,26 @@ func (ce *compilationEngine) compileSubroutineBody() {
 func (ce *compilationEngine) compileVarDec() {
 	fmt.Fprintf(ce.outf, "<varDec>\n")
 
-	ce.process("var")
-	ce.compileType()
-	ce.compileCurrentToken()
+	stEntry := stEntry{kind: "var", index: ce.routineSt.varCount}
+	ce.jt.advance()
+	stEntry.dataType = ce.jt.currToken
+	ce.jt.advance()
+	stEntry.name = ce.jt.currToken
+	ce.jt.advance()
+	ce.routineSt.table[stEntry.name] = stEntry
+	// TODO: remove
+	ce.printFromSt(ce.routineSt, stEntry.name)
 	for ce.jt.currToken == "," {
 		ce.process(",")
-		ce.compileCurrentToken()
+		stEntry.index += 1
+		stEntry.name = ce.jt.currToken
+		ce.jt.advance()
+		ce.routineSt.table[stEntry.name] = stEntry
+		// TODO: remove
+		ce.printFromSt(ce.routineSt, stEntry.name)
 	}
 	ce.process(";")
+	ce.routineSt.varCount = stEntry.index + 1
 
 	fmt.Fprintf(ce.outf, "</varDec>\n")
 }

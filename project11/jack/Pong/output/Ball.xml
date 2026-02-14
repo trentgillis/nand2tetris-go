@@ -538,13 +538,26 @@
 <subroutineBody>
 <symbol> { </symbol>
 <varDec>
-<keyword> var </keyword>
-<keyword> int </keyword>
-<identifier> dx </identifier>
+<identifier>
+<name> dx </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> dy </identifier>
+<identifier>
+<name> dy </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 1 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> temp </identifier>
+<identifier>
+<name> temp </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 2 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <statements>
@@ -1394,17 +1407,40 @@
 <subroutineBody>
 <symbol> { </symbol>
 <varDec>
-<keyword> var </keyword>
-<keyword> int </keyword>
-<identifier> newx </identifier>
+<identifier>
+<name> newx </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> newy </identifier>
+<identifier>
+<name> newy </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 1 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> divLengthx </identifier>
+<identifier>
+<name> divLengthx </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 2 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> divLengthy </identifier>
+<identifier>
+<name> divLengthy </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 3 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> factor </identifier>
+<identifier>
+<name> factor </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 4 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <statements>

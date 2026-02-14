@@ -297,15 +297,21 @@
 <subroutineBody>
 <symbol> { </symbol>
 <varDec>
-<keyword> var </keyword>
-<keyword> char </keyword>
-<identifier> key </identifier>
+<identifier>
+<name> key </name>
+<dataType> char </dataType>
+<kind> var </kind>
+<index> 0 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <varDec>
-<keyword> var </keyword>
-<keyword> boolean </keyword>
-<identifier> exit </identifier>
+<identifier>
+<name> exit </name>
+<dataType> boolean </dataType>
+<kind> var </kind>
+<index> 1 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <statements>

@@ -13,9 +13,12 @@
 <subroutineBody>
 <symbol> { </symbol>
 <varDec>
-<keyword> var </keyword>
-<keyword> int </keyword>
-<identifier> value </identifier>
+<identifier>
+<name> value </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 0 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <statements>
@@ -113,17 +116,28 @@
 <subroutineBody>
 <symbol> { </symbol>
 <varDec>
-<keyword> var </keyword>
-<keyword> int </keyword>
-<identifier> mask </identifier>
+<identifier>
+<name> mask </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<identifier> position </identifier>
+<identifier>
+<name> position </name>
+<dataType> int </dataType>
+<kind> var </kind>
+<index> 1 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <varDec>
-<keyword> var </keyword>
-<keyword> boolean </keyword>
-<identifier> loop </identifier>
+<identifier>
+<name> loop </name>
+<dataType> boolean </dataType>
+<kind> var </kind>
+<index> 2 </index>
+</identifier>
 <symbol> ; </symbol>
 </varDec>
 <statements>
