@@ -125,23 +125,47 @@
 <identifier> new </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<keyword> int </keyword>
-<identifier> Ax </identifier>
+<identifier>
+<name> Ax </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> Ay </identifier>
+<identifier>
+<name> Ay </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 1 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> AleftWall </identifier>
+<identifier>
+<name> AleftWall </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 2 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> ArightWall </identifier>
+<identifier>
+<name> ArightWall </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 3 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> AtopWall </identifier>
+<identifier>
+<name> AtopWall </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 4 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> AbottomWall </identifier>
+<identifier>
+<name> AbottomWall </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 5 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>
@@ -496,11 +520,19 @@
 <identifier> setDestination </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<keyword> int </keyword>
-<identifier> destx </identifier>
+<identifier>
+<name> destx </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 1 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> desty </identifier>
+<identifier>
+<name> desty </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 2 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>
@@ -1351,8 +1383,12 @@
 <identifier> bounce </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<keyword> int </keyword>
-<identifier> bouncingDirection </identifier>
+<identifier>
+<name> bouncingDirection </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 1 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>

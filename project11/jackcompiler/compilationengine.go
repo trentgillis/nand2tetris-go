@@ -75,7 +75,7 @@ func (ce *compilationEngine) compileClassVarDec() {
 	ce.jt.advance()
 	ce.classSt.table[stEntry.name] = stEntry
 	// TODO: temp
-	ce.printFromSt(stEntry.name)
+	ce.printFromSt(ce.classSt, stEntry.name)
 
 	for ce.jt.currToken == "," {
 		ce.process(",")
@@ -86,7 +86,7 @@ func (ce *compilationEngine) compileClassVarDec() {
 
 		ce.classSt.table[stEntry.name] = stEntry
 		// TODO: temp
-		ce.printFromSt(stEntry.name)
+		ce.printFromSt(ce.classSt, stEntry.name)
 	}
 	ce.process(";")
 
@@ -105,11 +105,20 @@ func (ce *compilationEngine) compileClassVarDec() {
 func (ce *compilationEngine) compileSubroutine() {
 	fmt.Fprintf(ce.outf, "<subroutineDec>\n")
 
+	ce.routineSt = newSymbolTable()
+
 	switch ce.jt.currToken {
 	case "constructor":
 		ce.process("constructor")
 	case "method":
 		ce.process("method")
+		ce.routineSt.table["this"] = stEntry{
+			name:     "this",
+			kind:     "arg",
+			dataType: ce.jt.currToken,
+			index:    0,
+		}
+		ce.routineSt.argCount += 1
 	case "function":
 		ce.process("function")
 	default:
@@ -131,11 +140,18 @@ func (ce *compilationEngine) compileSubroutine() {
 func (ce *compilationEngine) compileParameterList() {
 	fmt.Fprintf(ce.outf, "<parameterList>\n")
 
+	stEntry := stEntry{kind: "arg", index: ce.routineSt.argCount}
 	for ce.jt.currToken != ")" {
-		ce.compileType()
-		ce.compileCurrentToken()
+		stEntry.dataType = ce.jt.currToken
+		ce.jt.advance()
+		stEntry.name = ce.jt.currToken
+		ce.jt.advance()
+		ce.routineSt.table[stEntry.name] = stEntry
+		ce.printFromSt(ce.routineSt, stEntry.name)
+
 		if ce.jt.currToken == "," {
 			ce.process(",")
+			stEntry.index += 1
 		}
 	}
 
@@ -379,12 +395,12 @@ func (ce *compilationEngine) compileType() {
 	}
 }
 
-func (ce *compilationEngine) printFromSt(identifier string) {
+func (ce *compilationEngine) printFromSt(st symbolTable, identifier string) {
 	fmt.Fprintf(ce.outf, "<identifier>\n")
-	fmt.Fprintf(ce.outf, "<name> %s </name>\n", ce.classSt.table[identifier].name)
-	fmt.Fprintf(ce.outf, "<dataType> %s </dataType>\n", ce.classSt.table[identifier].dataType)
-	fmt.Fprintf(ce.outf, "<kind> %s </kind>\n", ce.classSt.table[identifier].kind)
-	fmt.Fprintf(ce.outf, "<index> %d </index>\n", ce.classSt.table[identifier].index)
+	fmt.Fprintf(ce.outf, "<name> %s </name>\n", st.table[identifier].name)
+	fmt.Fprintf(ce.outf, "<dataType> %s </dataType>\n", st.table[identifier].dataType)
+	fmt.Fprintf(ce.outf, "<kind> %s </kind>\n", st.table[identifier].kind)
+	fmt.Fprintf(ce.outf, "<index> %d </index>\n", st.table[identifier].index)
 	fmt.Fprintf(ce.outf, "</identifier>\n")
 }
 

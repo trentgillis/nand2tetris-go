@@ -49,17 +49,33 @@
 <identifier> new </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<keyword> int </keyword>
-<identifier> Ax </identifier>
+<identifier>
+<name> Ax </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> Ay </identifier>
+<identifier>
+<name> Ay </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 1 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> Awidth </identifier>
+<identifier>
+<name> Awidth </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 2 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> Aheight </identifier>
+<identifier>
+<name> Aheight </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 3 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>
@@ -332,8 +348,12 @@
 <identifier> setDirection </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<keyword> int </keyword>
-<identifier> Adirection </identifier>
+<identifier>
+<name> Adirection </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 1 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>
@@ -416,8 +436,12 @@
 <identifier> setWidth </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<keyword> int </keyword>
-<identifier> Awidth </identifier>
+<identifier>
+<name> Awidth </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 1 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>

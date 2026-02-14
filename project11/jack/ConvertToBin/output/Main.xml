@@ -102,8 +102,12 @@
 <identifier> convert </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<keyword> int </keyword>
-<identifier> value </identifier>
+<identifier>
+<name> value </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 0 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>
@@ -336,8 +340,12 @@
 <identifier> nextMask </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<keyword> int </keyword>
-<identifier> mask </identifier>
+<identifier>
+<name> mask </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 0 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>
@@ -398,14 +406,26 @@
 <identifier> fillMemory </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<keyword> int </keyword>
-<identifier> address </identifier>
+<identifier>
+<name> address </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> length </identifier>
+<identifier>
+<name> length </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 1 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> value </identifier>
+<identifier>
+<name> value </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 2 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>

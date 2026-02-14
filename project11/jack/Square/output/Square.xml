@@ -33,14 +33,26 @@
 <identifier> new </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<keyword> int </keyword>
-<identifier> ax </identifier>
+<identifier>
+<name> ax </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> ay </identifier>
+<identifier>
+<name> ay </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 1 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> asize </identifier>
+<identifier>
+<name> asize </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 2 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>

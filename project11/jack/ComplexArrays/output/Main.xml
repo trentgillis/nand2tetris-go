@@ -748,8 +748,12 @@
 <identifier> double </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<keyword> int </keyword>
-<identifier> a </identifier>
+<identifier>
+<name> a </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 0 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>
@@ -778,11 +782,19 @@
 <identifier> fill </identifier>
 <symbol> ( </symbol>
 <parameterList>
-<identifier> Array </identifier>
-<identifier> a </identifier>
+<identifier>
+<name> a </name>
+<dataType> Array </dataType>
+<kind> arg </kind>
+<index> 0 </index>
+</identifier>
 <symbol> , </symbol>
-<keyword> int </keyword>
-<identifier> size </identifier>
+<identifier>
+<name> size </name>
+<dataType> int </dataType>
+<kind> arg </kind>
+<index> 1 </index>
+</identifier>
 </parameterList>
 <symbol> ) </symbol>
 <subroutineBody>
