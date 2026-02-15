@@ -95,22 +95,46 @@ func (ce *compilationEngine) compileSubroutine() {
 
 	switch ce.jt.currToken {
 	case "constructor":
+		// TODO: compile constructors
 		ce.process("constructor")
 	case "method":
-		ce.process("method")
-		ce.routineSt.table["this"] = stEntry{
-			name:     "this",
-			kind:     "arg",
-			dataType: ce.jt.currToken,
-			index:    0,
-		}
-		ce.routineSt.argCount += 1
+		ce.compileMethod()
 	case "function":
-		ce.process("function")
+		ce.compileFunction()
 	default:
 		log.Fatalf("Syntax error at token %s. Expected: constructor, method or function", ce.jt.currToken)
 	}
+}
 
+func (ce *compilationEngine) compileFunction() {
+	ce.process("function")
+	subroutineName, nVars := ce.compileSubroutineDeclaration()
+	ce.vw.writeFunction(ce.className, subroutineName, nVars)
+	ce.compileSubroutineBody()
+}
+
+func (ce *compilationEngine) compileMethod() {
+	ce.process("method")
+	ce.routineSt.table["this"] = stEntry{
+		name:     "this",
+		kind:     "arg",
+		dataType: ce.jt.currToken,
+		index:    0,
+	}
+	ce.routineSt.argCount += 1
+
+	subroutineName, nVars := ce.compileSubroutineDeclaration()
+	ce.vw.writeFunction(ce.className, subroutineName, nVars)
+	ce.vw.writePush(ARGUMENT, 0)
+	ce.vw.writePop(POINTER, 0)
+
+	ce.compileSubroutineBody()
+}
+
+// Compiles generic subroutine declaration code that is shared by methods, functions and constructors and is
+// therefore required for the compilation of all of the subroutine types. This includes the subroutine return
+// type, name and parameter list.
+func (ce *compilationEngine) compileSubroutineDeclaration() (string, int) {
 	ce.compileType()
 	subroutineName := ce.jt.currToken
 	ce.jt.advance()
@@ -118,9 +142,7 @@ func (ce *compilationEngine) compileSubroutine() {
 	nVars := ce.compileParameterList()
 	ce.process(")")
 
-	// Write function and compile the subroutine body
-	ce.vw.writeFunction(ce.className, subroutineName, nVars)
-	ce.compileSubroutineBody()
+	return subroutineName, nVars
 }
 
 // Performs syntax analysis and outputs XML for parameter list declaration
