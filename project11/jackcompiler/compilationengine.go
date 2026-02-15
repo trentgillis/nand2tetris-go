@@ -279,10 +279,12 @@ func (ce *compilationEngine) compileDoStatement() {
 // 'return' expression? ';'
 func (ce *compilationEngine) compileReturnStatement() {
 	ce.process("return")
-	ce.vw.writeReturn()
 	if ce.jt.currToken != ";" {
 		ce.compileExpression()
+	} else {
+		ce.vw.writePush(CONSTANT, 0)
 	}
+	ce.vw.writeReturn()
 	ce.process(";")
 }
 
@@ -304,6 +306,7 @@ func (ce *compilationEngine) compileSubroutineCall() {
 	ce.process(")")
 
 	ce.vw.writeCall(arg1, arg2, nVars)
+	ce.vw.writePop(TEMP, 0)
 }
 
 // Performs syntax analysis and outputs XML for an expression list
