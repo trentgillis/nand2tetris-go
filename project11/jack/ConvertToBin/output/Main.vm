@@ -1,0 +1,75 @@
+function Main.main 0
+push constant 8001
+push constant 16
+push constant 1
+neg
+call Main.fillMemory 3
+pop temp 0
+push constant 8000
+call Memory.peek 1
+pop local 0
+push local 0
+call Main.convert 1
+pop temp 0
+push constant 0
+return
+function Main.convert 1
+push  0
+pop local 2
+push local 2
+push local 1
+push constant 1
+add
+pop local 1
+push local 0
+call Main.nextMask 1
+pop local 0
+push local 1
+push constant 16
+not
+push arg 0
+push local 0
+push constant 0
+not
+push constant 8000
+push local 1
+add
+push constant 1
+call Memory.poke 2
+pop temp 0
+push constant 8000
+push local 1
+add
+push constant 0
+call Memory.poke 2
+pop temp 0
+push  0
+pop local 2
+push constant 0
+return
+function Main.nextMask 1
+push arg 0
+push constant 0
+push constant 1
+return
+push arg 0
+push constant 2
+call Math.multiply 2
+return
+function Main.fillMemory 5
+push arg 1
+push constant 0
+push arg 0
+push arg 2
+call Memory.poke 2
+pop temp 0
+push arg 1
+push constant 1
+sub
+pop arg 1
+push arg 0
+push constant 1
+add
+pop arg 0
+push constant 0
+return

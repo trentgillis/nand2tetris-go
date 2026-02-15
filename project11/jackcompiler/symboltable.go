@@ -12,7 +12,7 @@ type symbolTable struct {
 	staticCount int
 	fieldCount  int
 	argCount    int
-	varCount    int
+	localCount  int
 }
 
 // type symbolTable map[string]stEntry
@@ -23,6 +23,6 @@ func newSymbolTable() symbolTable {
 		staticCount: 0,
 		fieldCount:  0,
 		argCount:    0,
-		varCount:    0,
+		localCount:  0,
 	}
 }

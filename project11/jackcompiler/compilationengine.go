@@ -183,7 +183,7 @@ func (ce *compilationEngine) compileSubroutineBody() {
 // Performs syntax analysis and outputs XML for variable declarations in a subroutine body
 // 'var' type varName (',' type varName)* ';'
 func (ce *compilationEngine) compileVarDec() {
-	stEntry := stEntry{kind: "var", index: ce.routineSt.varCount}
+	stEntry := stEntry{kind: "local", index: ce.routineSt.localCount}
 	ce.jt.advance()
 	stEntry.dataType = ce.jt.currToken
 	ce.jt.advance()
@@ -198,7 +198,7 @@ func (ce *compilationEngine) compileVarDec() {
 		ce.routineSt.table[stEntry.name] = stEntry
 	}
 	ce.process(";")
-	ce.routineSt.varCount = stEntry.index + 1
+	ce.routineSt.localCount = stEntry.index + 1
 }
 
 // Performs syntax analysis and outputs XML for one or more statements
@@ -222,11 +222,12 @@ func (ce *compilationEngine) compileStatements() {
 	}
 }
 
-// Performs syntax analysis and outputs XML for a let statement
+// Performs compilation of let statements
 // 'let' varName ('[' expression ']')? '=' expression ';'
 func (ce *compilationEngine) compileLetStatement() {
 	ce.process("let")
-	ce.compileCurrentToken()
+	varEntry := ce.lookupVar(ce.jt.currToken)
+	ce.jt.advance()
 	if ce.jt.currToken == "[" {
 		ce.process("[")
 		ce.compileExpression()
@@ -234,6 +235,7 @@ func (ce *compilationEngine) compileLetStatement() {
 	}
 	ce.process("=")
 	ce.compileExpression()
+	ce.vw.writePop(varEntry.kind, varEntry.index)
 	ce.process(";")
 }
 
@@ -271,7 +273,7 @@ func (ce *compilationEngine) compileWhileStatement() {
 // 'do' subroutineCall ';'
 func (ce *compilationEngine) compileDoStatement() {
 	ce.process("do")
-	ce.compileSubroutineCall()
+	ce.compileSubroutineCall(true)
 	ce.process(";")
 }
 
@@ -290,7 +292,7 @@ func (ce *compilationEngine) compileReturnStatement() {
 
 // Performs syntax analysis and outputs XML for a subroutine call
 // subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
-func (ce *compilationEngine) compileSubroutineCall() {
+func (ce *compilationEngine) compileSubroutineCall(isDo bool) {
 	var arg1, arg2 string
 	var nVars int
 
@@ -306,7 +308,9 @@ func (ce *compilationEngine) compileSubroutineCall() {
 	ce.process(")")
 
 	ce.vw.writeCall(arg1, arg2, nVars)
-	ce.vw.writePop(TEMP, 0)
+	if isDo {
+		ce.vw.writePop(TEMP, 0)
+	}
 }
 
 // Performs syntax analysis and outputs XML for an expression list
@@ -347,18 +351,20 @@ func (ce *compilationEngine) compileTerm() {
 		ce.process("(")
 		ce.compileExpression()
 		ce.process(")")
+	} else if slices.Contains([]string{"-", "~"}, ce.jt.currToken) {
+		op := ce.jt.currToken
+		ce.jt.advance()
+		ce.compileTerm()
+		ce.compileUnaryOp(op)
 	} else if len(ce.jt.lineTokens) > 0 && (ce.jt.lineTokens[0] == "." || ce.jt.lineTokens[0] == "(") {
 		// Handle subroutine call case with lookahead
-		ce.compileSubroutineCall()
+		ce.compileSubroutineCall(false)
 	} else if len(ce.jt.lineTokens) > 0 && ce.jt.lineTokens[0] == "[" {
 		// TODO: compile array access
 		ce.compileCurrentToken()
 		ce.process("[")
 		ce.compileExpression()
 		ce.process("]")
-	} else if slices.Contains([]string{"-", "~"}, ce.jt.currToken) {
-		ce.compileUnaryOp()
-		ce.compileTerm()
 	} else {
 		if tokenType(ce.jt.currToken) == TOKEN_INT_CONST {
 			val, err := strconv.Atoi(ce.jt.currToken)
@@ -389,11 +395,18 @@ func (ce *compilationEngine) compileOp(op string) {
 		ce.vw.writeArithmetic(SUB)
 	case "*":
 		ce.vw.writeCall("Math", "multiply", 2)
+	case "/":
+		ce.vw.writeCall("Math", "divide", 2)
 	}
 }
 
-func (ce *compilationEngine) compileUnaryOp() {
-	ce.process(ce.jt.currToken)
+func (ce *compilationEngine) compileUnaryOp(op string) {
+	switch op {
+	case "-":
+		ce.vw.writeArithmetic(NEG)
+	case "~":
+		ce.vw.writeArithmetic(NOT)
+	}
 }
 
 func (ce *compilationEngine) compileType() {
@@ -410,6 +423,15 @@ func (ce *compilationEngine) compileType() {
 		// Type is a className, simply advance to the next token
 		ce.jt.advance()
 	}
+}
+
+func (ce *compilationEngine) lookupVar(varName string) stEntry {
+	varEntry, ok := ce.routineSt.table[varName]
+	if !ok {
+		varEntry = ce.classSt.table[varName]
+	}
+
+	return varEntry
 }
 
 func (ce *compilationEngine) compileCurrentToken() {
