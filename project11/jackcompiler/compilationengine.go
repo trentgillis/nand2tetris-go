@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"slices"
+	"strconv"
 )
 
 type compilationEngine struct {
@@ -278,6 +279,7 @@ func (ce *compilationEngine) compileDoStatement() {
 // 'return' expression? ';'
 func (ce *compilationEngine) compileReturnStatement() {
 	ce.process("return")
+	ce.vw.writeReturn()
 	if ce.jt.currToken != ";" {
 		ce.compileExpression()
 	}
@@ -287,26 +289,38 @@ func (ce *compilationEngine) compileReturnStatement() {
 // Performs syntax analysis and outputs XML for a subroutine call
 // subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
 func (ce *compilationEngine) compileSubroutineCall() {
-	ce.compileCurrentToken()
+	var arg1, arg2 string
+	var nVars int
+
+	arg1 = ce.jt.currToken
+	ce.jt.advance()
 	if ce.jt.currToken == "." {
 		ce.process(".")
-		ce.compileCurrentToken()
+		arg2 = ce.jt.currToken
+		ce.jt.advance()
 	}
 	ce.process("(")
-	ce.compileExpressionList()
+	nVars = ce.compileExpressionList()
 	ce.process(")")
+
+	ce.vw.writeCall(arg1, arg2, nVars)
 }
 
 // Performs syntax analysis and outputs XML for an expression list
 // (expression (',' expression)*)?
-func (ce *compilationEngine) compileExpressionList() {
+func (ce *compilationEngine) compileExpressionList() int {
+	nVars := 0
 	if ce.jt.currToken != ")" {
+		nVars += 1
 		ce.compileExpression()
 		for ce.jt.currToken == "," {
+			nVars += 1
 			ce.process(",")
 			ce.compileExpression()
 		}
 	}
+
+	return nVars
 }
 
 // Performs syntax analysis and outputs XML for an expression
@@ -314,12 +328,14 @@ func (ce *compilationEngine) compileExpressionList() {
 func (ce *compilationEngine) compileExpression() {
 	ce.compileTerm()
 	for slices.Contains([]string{"+", "-", "*", "/", "&", "|", ">", "<", "="}, ce.jt.currToken) {
-		ce.compileOp()
+		op := ce.jt.currToken
+		ce.jt.advance()
 		ce.compileTerm()
+		ce.compileOp(op)
 	}
 }
 
-// Performs syntax analysis and outputs XML for an term
+// Compiles and outputs vm code for a term
 // integerConstant | stringConstant | keywordConstant | varName | varName'[' expression ']' |
 // '(' expression ')' | (unaryOp term) | subroutineCall
 func (ce *compilationEngine) compileTerm() {
@@ -332,23 +348,45 @@ func (ce *compilationEngine) compileTerm() {
 		// Handle subroutine call case with lookahead
 		ce.compileSubroutineCall()
 	} else if len(ce.jt.lineTokens) > 0 && ce.jt.lineTokens[0] == "[" {
-		// Handle array access with lookahead
+		// TODO: compile array access
 		ce.compileCurrentToken()
 		ce.process("[")
 		ce.compileExpression()
 		ce.process("]")
 	} else if slices.Contains([]string{"-", "~"}, ce.jt.currToken) {
-		// Handle unary op term
 		ce.compileUnaryOp()
 		ce.compileTerm()
 	} else {
-		// Handle every else as an identifier. This includes all constants, keywords and varNames
-		ce.compileCurrentToken()
+		if tokenType(ce.jt.currToken) == TOKEN_INT_CONST {
+			val, err := strconv.Atoi(ce.jt.currToken)
+			if err != nil {
+				log.Fatal(err)
+			}
+			ce.vw.writePush(CONSTANT, val)
+		} else if tokenType(ce.jt.currToken) == TOKEN_STRING_CONST {
+			// TODO: write string const
+		} else {
+			// TODO: lookup and write identifier
+			identifier, ok := ce.routineSt.table[ce.jt.currToken]
+			if !ok {
+				identifier = ce.classSt.table[ce.jt.currToken]
+			}
+			ce.vw.writePush(segment(identifier.kind), identifier.index)
+		}
+		ce.jt.advance()
 	}
 }
 
-func (ce *compilationEngine) compileOp() {
-	ce.process(ce.jt.currToken)
+func (ce *compilationEngine) compileOp(op string) {
+	// "+", "-", "*", "/", "&", "|", ">", "<", "="
+	switch op {
+	case "+":
+		ce.vw.writeArithmetic(ADD)
+	case "-":
+		ce.vw.writeArithmetic(SUB)
+	case "*":
+		ce.vw.writeCall("Math", "multiply", 2)
+	}
 }
 
 func (ce *compilationEngine) compileUnaryOp() {
