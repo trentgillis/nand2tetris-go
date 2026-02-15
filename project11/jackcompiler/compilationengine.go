@@ -109,9 +109,8 @@ func (ce *compilationEngine) compileSubroutine() {
 
 func (ce *compilationEngine) compileFunction() {
 	ce.process("function")
-	subroutineName, nVars := ce.compileSubroutineDeclaration()
-	ce.vw.writeFunction(ce.className, subroutineName, nVars)
-	ce.compileSubroutineBody()
+	subroutineName := ce.compileSubroutineDeclaration()
+	ce.compileSubroutineBody(subroutineName, false)
 }
 
 func (ce *compilationEngine) compileMethod() {
@@ -124,36 +123,30 @@ func (ce *compilationEngine) compileMethod() {
 	}
 	ce.routineSt.argCount += 1
 
-	subroutineName, nVars := ce.compileSubroutineDeclaration()
-	ce.vw.writeFunction(ce.className, subroutineName, nVars)
-	ce.vw.writePush(ARGUMENT, 0)
-	ce.vw.writePop(POINTER, 0)
-
-	ce.compileSubroutineBody()
+	subroutineName := ce.compileSubroutineDeclaration()
+	ce.compileSubroutineBody(subroutineName, true)
 }
 
 // Compiles generic subroutine declaration code that is shared by methods, functions and constructors and is
 // therefore required for the compilation of all of the subroutine types. This includes the subroutine return
 // type, name and parameter list.
-func (ce *compilationEngine) compileSubroutineDeclaration() (string, int) {
+func (ce *compilationEngine) compileSubroutineDeclaration() string {
 	ce.compileType()
 	subroutineName := ce.jt.currToken
 	ce.jt.advance()
 	ce.process("(")
-	nVars := ce.compileParameterList()
+	ce.compileParameterList()
 	ce.process(")")
 
-	return subroutineName, nVars
+	return subroutineName
 }
 
 // Performs syntax analysis and outputs XML for parameter list declaration
 // ((type varName) (',' varName)*)?
-func (ce *compilationEngine) compileParameterList() int {
-	nVars := 0
+func (ce *compilationEngine) compileParameterList() {
 	stEntry := stEntry{kind: "arg", index: ce.routineSt.argCount}
 
 	for ce.jt.currToken != ")" {
-		nVars += 1
 		stEntry.dataType = ce.jt.currToken
 		ce.jt.advance()
 		stEntry.name = ce.jt.currToken
@@ -161,28 +154,35 @@ func (ce *compilationEngine) compileParameterList() int {
 		ce.routineSt.table[stEntry.name] = stEntry
 		if ce.jt.currToken == "," {
 			ce.process(",")
-			nVars += 1
 			stEntry.index += 1
 		}
 	}
 
-	return nVars
 }
 
 // Performs syntax analysis and outputs XML for subroutine bodies
 // '{' varDec* statements '}'
-func (ce *compilationEngine) compileSubroutineBody() {
+func (ce *compilationEngine) compileSubroutineBody(subroutineName string, isMethod bool) {
+	nVars := 0
 	ce.process("{")
 	for ce.jt.currToken == "var" {
-		ce.compileVarDec()
+		nVars = ce.compileVarDec()
 	}
+
+	ce.vw.writeFunction(ce.className, subroutineName, nVars)
+	if isMethod {
+		ce.vw.writePush(ARGUMENT, 0)
+		ce.vw.writePop(POINTER, 0)
+	}
+
 	ce.compileStatements()
 	ce.process("}")
 }
 
 // Performs syntax analysis and outputs XML for variable declarations in a subroutine body
 // 'var' type varName (',' type varName)* ';'
-func (ce *compilationEngine) compileVarDec() {
+func (ce *compilationEngine) compileVarDec() int {
+	nVars := 1
 	stEntry := stEntry{kind: "local", index: ce.routineSt.localCount}
 	ce.jt.advance()
 	stEntry.dataType = ce.jt.currToken
@@ -191,6 +191,7 @@ func (ce *compilationEngine) compileVarDec() {
 	ce.jt.advance()
 	ce.routineSt.table[stEntry.name] = stEntry
 	for ce.jt.currToken == "," {
+		nVars += 1
 		ce.process(",")
 		stEntry.index += 1
 		stEntry.name = ce.jt.currToken
@@ -199,6 +200,7 @@ func (ce *compilationEngine) compileVarDec() {
 	}
 	ce.process(";")
 	ce.routineSt.localCount = stEntry.index + 1
+	return nVars
 }
 
 // Performs syntax analysis and outputs XML for one or more statements

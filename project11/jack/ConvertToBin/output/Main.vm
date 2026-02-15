@@ -1,4 +1,4 @@
-function Main.main 0
+function Main.main 1
 push constant 8001
 push constant 16
 push constant 1
@@ -47,7 +47,7 @@ push  0
 pop local 2
 push constant 0
 return
-function Main.nextMask 1
+function Main.nextMask 0
 push arg 0
 push constant 0
 push constant 1
@@ -56,7 +56,7 @@ push arg 0
 push constant 2
 call Math.multiply 2
 return
-function Main.fillMemory 5
+function Main.fillMemory 0
 push arg 1
 push constant 0
 push arg 0
