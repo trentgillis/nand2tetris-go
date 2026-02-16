@@ -321,7 +321,6 @@ func (ce *compilationEngine) compileDoStatement() {
 // 'return' expression? ';'
 func (ce *compilationEngine) compileReturnStatement() {
 	ce.process("return")
-	fmt.Printf("%s - %s\n", ce.outf.Name(), ce.jt.currToken)
 	if ce.jt.currToken == ";" {
 		ce.vw.writePush(CONSTANT, 0)
 	} else {
@@ -398,58 +397,61 @@ func (ce *compilationEngine) compileExpression() {
 // '(' expression ')' | (unaryOp term) | subroutineCall
 func (ce *compilationEngine) compileTerm() {
 	if ce.jt.currToken == "(" {
-		// Handle expression wrapped in parens
 		ce.process("(")
 		ce.compileExpression()
 		ce.process(")")
 	} else if slices.Contains([]string{"-", "~"}, ce.jt.currToken) {
-		op := ce.jt.currToken
-		ce.jt.advance()
-		ce.compileTerm()
-		ce.compileUnaryOp(op)
+		ce.compileUnaryOp()
 	} else if len(ce.jt.lineTokens) > 0 && (ce.jt.lineTokens[0] == "." || ce.jt.lineTokens[0] == "(") {
-		// Handle subroutine call case with lookahead
 		ce.compileSubroutineCall()
 	} else if len(ce.jt.lineTokens) > 0 && ce.jt.lineTokens[0] == "[" {
-		// TODO: compile array access
 		ce.compileCurrentToken()
 		ce.process("[")
 		ce.compileExpression()
 		ce.process("]")
 	} else {
-		if tokenType(ce.jt.currToken) == TOKEN_INT_CONST {
-			val, err := strconv.Atoi(ce.jt.currToken)
-			if err != nil {
-				log.Fatal(err)
-			}
-			ce.vw.writePush(CONSTANT, val)
-		} else if tokenType(ce.jt.currToken) == TOKEN_STRING_CONST {
-			str := ce.jt.currToken[1 : len(ce.jt.currToken)-1]
-			ce.vw.writePush(CONSTANT, len(str))
-			ce.vw.writeCall("String", "new", 1)
-			for _, c := range str {
-				ce.vw.writePush(CONSTANT, int(c))
-				ce.vw.writeCall("String", "appendChar", 2)
-			}
-		} else if tokenType(ce.jt.currToken) == TOKEN_KEYWORD {
-			switch ce.jt.currToken {
-			case "true":
-				ce.vw.writePush(CONSTANT, 0)
-				ce.vw.writeArithmetic(NOT)
-			case "null,", "false":
-				ce.vw.writePush(CONSTANT, 0)
-			case "this":
-				ce.vw.writePush(POINTER, 0)
-			}
-		} else {
-			// TODO: lookup and write identifier
-			identifier, ok := ce.routineSt.table[ce.jt.currToken]
-			if !ok {
-				identifier = ce.classSt.table[ce.jt.currToken]
-			}
+		switch tt := tokenType(ce.jt.currToken); tt {
+		case TOKEN_INT_CONST:
+			ce.compileIntConstant()
+		case TOKEN_STRING_CONST:
+			ce.compileStringLiteral()
+		case TOKEN_KEYWORD:
+			ce.compileKeyword()
+		default:
+			identifier, _ := ce.lookupVar(ce.jt.currToken)
 			ce.vw.writePush(segment(identifier.kind), identifier.index)
 		}
 		ce.jt.advance()
+	}
+}
+
+func (ce *compilationEngine) compileKeyword() {
+	switch ce.jt.currToken {
+	case "true":
+		ce.vw.writePush(CONSTANT, 0)
+		ce.vw.writeArithmetic(NOT)
+	case "null,", "false":
+		ce.vw.writePush(CONSTANT, 0)
+	case "this":
+		ce.vw.writePush(POINTER, 0)
+	}
+}
+
+func (ce *compilationEngine) compileIntConstant() {
+	val, err := strconv.Atoi(ce.jt.currToken)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ce.vw.writePush(CONSTANT, val)
+}
+
+func (ce *compilationEngine) compileStringLiteral() {
+	str := ce.jt.currToken[1 : len(ce.jt.currToken)-1]
+	ce.vw.writePush(CONSTANT, len(str))
+	ce.vw.writeCall("String", "new", 1)
+	for _, c := range str {
+		ce.vw.writePush(CONSTANT, int(c))
+		ce.vw.writeCall("String", "appendChar", 2)
 	}
 }
 
@@ -476,7 +478,10 @@ func (ce *compilationEngine) compileOp(op string) {
 	}
 }
 
-func (ce *compilationEngine) compileUnaryOp(op string) {
+func (ce *compilationEngine) compileUnaryOp() {
+	op := ce.jt.currToken
+	ce.jt.advance()
+	ce.compileTerm()
 	switch op {
 	case "-":
 		ce.vw.writeArithmetic(NEG)
