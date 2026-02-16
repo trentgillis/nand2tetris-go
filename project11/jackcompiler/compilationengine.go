@@ -95,6 +95,8 @@ func (ce *compilationEngine) compileClassVarDec() {
 // Performs subroutine declaration compilation and outputs appropriate vm code
 // ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
 func (ce *compilationEngine) compileSubroutine() {
+	ce.ifCount = 0
+	ce.whileCount = 0
 	ce.routineSt = newSymbolTable()
 
 	switch ce.jt.currToken {
@@ -120,7 +122,7 @@ func (ce *compilationEngine) compileMethod() {
 	ce.process("method")
 	ce.routineSt.table["this"] = stEntry{
 		name:     "this",
-		kind:     "arg",
+		kind:     "argument",
 		dataType: ce.jt.currToken,
 		index:    0,
 	}
@@ -147,7 +149,7 @@ func (ce *compilationEngine) compileSubroutineDeclaration() string {
 // Performs syntax analysis and outputs XML for parameter list declaration
 // ((type varName) (',' varName)*)?
 func (ce *compilationEngine) compileParameterList() {
-	stEntry := stEntry{kind: "arg", index: ce.routineSt.argCount}
+	stEntry := stEntry{kind: "argument", index: ce.routineSt.argCount}
 
 	for ce.jt.currToken != ")" {
 		stEntry.dataType = ce.jt.currToken
@@ -249,6 +251,7 @@ func (ce *compilationEngine) compileLetStatement() {
 func (ce *compilationEngine) compileIfStatement() {
 	ifTrueLabel := fmt.Sprintf("IF_TRUE%d", ce.ifCount)
 	ifFalseLabel := fmt.Sprintf("IF_FALSE%d", ce.ifCount)
+	ifEndLabel := fmt.Sprintf("IF_END%d", ce.ifCount)
 	ce.ifCount += 1
 
 	ce.process("if")
@@ -261,6 +264,7 @@ func (ce *compilationEngine) compileIfStatement() {
 	ce.vw.writeLabel(ifTrueLabel)
 	ce.compileStatements()
 	ce.process("}")
+	ce.vw.writeGoto(ifEndLabel)
 	ce.vw.writeLabel(ifFalseLabel)
 	if ce.jt.currToken == "else" {
 		ce.process("else")
@@ -268,18 +272,28 @@ func (ce *compilationEngine) compileIfStatement() {
 		ce.compileStatements()
 		ce.process("}")
 	}
+	ce.vw.writeLabel(ifEndLabel)
 }
 
 // Performs syntax analysis and outputs XML for a while statement
 // 'while' '(' expression ')' '{' statements '}'
 func (ce *compilationEngine) compileWhileStatement() {
+	whileExpLabel := fmt.Sprintf("WHILE_EXP%d", ce.whileCount)
+	whileEndLabel := fmt.Sprintf("WHILE_END%d", ce.whileCount)
+	ce.whileCount += 1
+
+	ce.vw.writeLabel(whileExpLabel)
 	ce.process("while")
 	ce.process("(")
 	ce.compileExpression()
+	ce.vw.writeArithmetic(NOT)
+	ce.vw.writeIf(whileEndLabel)
 	ce.process(")")
 	ce.process("{")
 	ce.compileStatements()
+	ce.vw.writeGoto(whileExpLabel)
 	ce.process("}")
+	ce.vw.writeLabel(whileEndLabel)
 }
 
 // Performs syntax analysis and outputs XML for a do statement
