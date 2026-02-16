@@ -274,15 +274,17 @@ func (ce *compilationEngine) compileIfStatement() {
 	ce.vw.writeLabel(ifTrueLabel)
 	ce.compileStatements()
 	ce.process("}")
-	ce.vw.writeGoto(ifEndLabel)
-	ce.vw.writeLabel(ifFalseLabel)
 	if ce.jt.currToken == "else" {
+		ce.vw.writeGoto(ifEndLabel)
+		ce.vw.writeLabel(ifFalseLabel)
 		ce.process("else")
 		ce.process("{")
 		ce.compileStatements()
 		ce.process("}")
+		ce.vw.writeLabel(ifEndLabel)
+	} else {
+		ce.vw.writeLabel(ifFalseLabel)
 	}
-	ce.vw.writeLabel(ifEndLabel)
 }
 
 // Performs syntax analysis and outputs XML for a while statement
