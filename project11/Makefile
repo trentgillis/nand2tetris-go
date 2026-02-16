@@ -18,6 +18,10 @@ clean:
 test:
 	./tools/TextComparer.sh ./jack/Average/Main.vm ./jack/Average/output/Main.vm
 	./tools/TextComparer.sh ./jack/ConvertToBin/Main.vm ./jack/ConvertToBin/output/Main.vm
+	./tools/TextComparer.sh ./jack/Pong/Main.vm ./jack/Pong/output/Main.vm
+	./tools/TextComparer.sh ./jack/Pong/Ball.vm ./jack/Pong/output/Ball.vm
+	./tools/TextComparer.sh ./jack/Pong/Bat.vm ./jack/Pong/output/Bat.vm
+	./tools/TextComparer.sh ./jack/Pong/PongGame.vm ./jack/Pong/output/PongGame.vm
 	./tools/TextComparer.sh ./jack/Seven/Main.vm ./jack/Seven/output/Main.vm
 	./tools/TextComparer.sh ./jack/Square/Main.vm ./jack/Square/output/Main.vm
 	./tools/TextComparer.sh ./jack/Square/Square.vm ./jack/Square/output/Square.vm
@@ -27,6 +31,6 @@ run: build
 	./jackc ./jack/Average
 	# ./jackc ./jack/ComplexArrays
 	./jackc ./jack/ConvertToBin
-	# ./jackc ./jack/Pong
+	./jackc ./jack/Pong
 	./jackc ./jack/Seven
 	./jackc ./jack/Square
