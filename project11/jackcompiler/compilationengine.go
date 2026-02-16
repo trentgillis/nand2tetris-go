@@ -242,17 +242,28 @@ func (ce *compilationEngine) compileStatements() {
 // Performs compilation of let statements
 // 'let' varName ('[' expression ']')? '=' expression ';'
 func (ce *compilationEngine) compileLetStatement() {
+	isLetArr := false
 	ce.process("let")
-	varEntry, _ := ce.lookupVar(ce.jt.currToken)
+	identifier, _ := ce.lookupVar(ce.jt.currToken)
 	ce.jt.advance()
 	if ce.jt.currToken == "[" {
+		isLetArr = true
+		ce.vw.writePush(segment(identifier.kind), identifier.index)
 		ce.process("[")
 		ce.compileExpression()
 		ce.process("]")
+		ce.vw.writeArithmetic(ADD)
 	}
 	ce.process("=")
 	ce.compileExpression()
-	ce.vw.writePop(varEntry.kind, varEntry.index)
+	if isLetArr {
+		ce.vw.writePop(TEMP, 0)
+		ce.vw.writePop(POINTER, 1)
+		ce.vw.writePush(TEMP, 0)
+		ce.vw.writePop(THAT, 0)
+	} else {
+		ce.vw.writePop(identifier.kind, identifier.index)
+	}
 	ce.process(";")
 }
 
