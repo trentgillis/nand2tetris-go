@@ -54,6 +54,18 @@ func (vw *vmWriter) writeArithmetic(command arithmeticCommand) {
 	fmt.Fprintf(vw.outf, "%s\n", command)
 }
 
+func (vw *vmWriter) writeLabel(label string) {
+	fmt.Fprintf(vw.outf, "label %s\n", label)
+}
+
+func (vw *vmWriter) writeGoto(label string) {
+	fmt.Fprintf(vw.outf, "goto %s\n", label)
+}
+
+func (vw *vmWriter) writeIf(label string) {
+	fmt.Fprintf(vw.outf, "if-goto %s\n", label)
+}
+
 func (vw *vmWriter) writeFunction(className string, subroutineName string, nVars int) {
 	fmt.Fprintf(vw.outf, "function %s.%s %d\n", className, subroutineName, nVars)
 }

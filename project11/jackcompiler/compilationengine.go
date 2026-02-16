@@ -1,6 +1,7 @@
 package jackcompiler
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"slices"
@@ -8,13 +9,15 @@ import (
 )
 
 type compilationEngine struct {
-	jt        jackTokenizer
-	vw        vmWriter
-	className string
-	classSt   symbolTable
-	routineSt symbolTable
-	inf       *os.File
-	outf      *os.File
+	jt         jackTokenizer
+	vw         vmWriter
+	className  string
+	classSt    symbolTable
+	routineSt  symbolTable
+	ifCount    int
+	whileCount int
+	inf        *os.File
+	outf       *os.File
 }
 
 func newCompilationEngine(inf *os.File, outf *os.File) compilationEngine {
@@ -22,7 +25,7 @@ func newCompilationEngine(inf *os.File, outf *os.File) compilationEngine {
 	vw := newVmWriter(outf)
 	jt := newJackTokenizer(inf, outf)
 	jt.advance() // move to the first token
-	return compilationEngine{inf: inf, outf: outf, jt: jt, vw: vw, classSt: classSt}
+	return compilationEngine{inf: inf, outf: outf, jt: jt, vw: vw, classSt: classSt, ifCount: 0, whileCount: 0}
 }
 
 func (ce *compilationEngine) process(token string) {
@@ -244,13 +247,22 @@ func (ce *compilationEngine) compileLetStatement() {
 // Performs syntax analysis and outputs XML for an if statement
 // 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
 func (ce *compilationEngine) compileIfStatement() {
+	ifTrueLabel := fmt.Sprintf("IF_TRUE%d", ce.ifCount)
+	ifFalseLabel := fmt.Sprintf("IF_FALSE%d", ce.ifCount)
+	ce.ifCount += 1
+
 	ce.process("if")
 	ce.process("(")
 	ce.compileExpression()
 	ce.process(")")
 	ce.process("{")
+	ce.vw.writeArithmetic(NOT)
+	ce.vw.writeIf(ifTrueLabel)
+	ce.vw.writeGoto(ifFalseLabel)
+	ce.vw.writeLabel(ifTrueLabel)
 	ce.compileStatements()
 	ce.process("}")
+	ce.vw.writeLabel(ifFalseLabel)
 	if ce.jt.currToken == "else" {
 		ce.process("else")
 		ce.process("{")

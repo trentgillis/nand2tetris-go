@@ -27,22 +27,32 @@ pop local 0
 push local 1
 push constant 16
 not
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
 push arg 0
 push local 0
 push constant 0
 not
+not
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
 push constant 8000
 push local 1
 add
 push constant 1
 call Memory.poke 2
 pop temp 0
+label IF_FALSE1
 push constant 8000
 push local 1
 add
 push constant 0
 call Memory.poke 2
 pop temp 0
+label IF_FALSE0
 push  0
 pop local 2
 push constant 0
@@ -50,8 +60,13 @@ return
 function Main.nextMask 0
 push arg 0
 push constant 0
+not
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
 push constant 1
 return
+label IF_FALSE2
 push arg 0
 push constant 2
 call Math.multiply 2
