@@ -13,8 +13,9 @@ call Main.convert 1
 pop temp 0
 push constant 0
 return
-function Main.convert 1
-push  0
+function Main.convert 3
+push constant 0
+not
 pop local 2
 push local 2
 push local 1
@@ -26,15 +27,16 @@ call Main.nextMask 1
 pop local 0
 push local 1
 push constant 16
-not
+gt
 not
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
 push arg 0
 push local 0
+and
 push constant 0
-not
+eq
 not
 if-goto IF_TRUE1
 goto IF_FALSE1
@@ -53,14 +55,14 @@ push constant 0
 call Memory.poke 2
 pop temp 0
 label IF_FALSE0
-push  0
+push constant 0
 pop local 2
 push constant 0
 return
 function Main.nextMask 0
 push arg 0
 push constant 0
-not
+eq
 if-goto IF_TRUE2
 goto IF_FALSE2
 label IF_TRUE2
@@ -74,6 +76,7 @@ return
 function Main.fillMemory 0
 push arg 1
 push constant 0
+gt
 push arg 0
 push arg 2
 call Memory.poke 2

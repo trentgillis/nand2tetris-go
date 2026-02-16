@@ -169,7 +169,7 @@ func (ce *compilationEngine) compileSubroutineBody(subroutineName string, isMeth
 	nVars := 0
 	ce.process("{")
 	for ce.jt.currToken == "var" {
-		nVars = ce.compileVarDec()
+		nVars += ce.compileVarDec()
 	}
 
 	ce.vw.writeFunction(ce.className, subroutineName, nVars)
@@ -256,7 +256,6 @@ func (ce *compilationEngine) compileIfStatement() {
 	ce.compileExpression()
 	ce.process(")")
 	ce.process("{")
-	ce.vw.writeArithmetic(NOT)
 	ce.vw.writeIf(ifTrueLabel)
 	ce.vw.writeGoto(ifFalseLabel)
 	ce.vw.writeLabel(ifTrueLabel)
@@ -388,6 +387,16 @@ func (ce *compilationEngine) compileTerm() {
 			ce.vw.writePush(CONSTANT, val)
 		} else if tokenType(ce.jt.currToken) == TOKEN_STRING_CONST {
 			// TODO: write string const
+		} else if tokenType(ce.jt.currToken) == TOKEN_KEYWORD {
+			switch ce.jt.currToken {
+			case "true":
+				ce.vw.writePush(CONSTANT, 0)
+				ce.vw.writeArithmetic(NOT)
+			case "null,", "false":
+				ce.vw.writePush(CONSTANT, 0)
+			case "this":
+				ce.vw.writePush(POINTER, 0)
+			}
 		} else {
 			// TODO: lookup and write identifier
 			identifier, ok := ce.routineSt.table[ce.jt.currToken]
@@ -401,7 +410,6 @@ func (ce *compilationEngine) compileTerm() {
 }
 
 func (ce *compilationEngine) compileOp(op string) {
-	// "+", "-", "*", "/", "&", "|", ">", "<", "="
 	switch op {
 	case "+":
 		ce.vw.writeArithmetic(ADD)
@@ -411,6 +419,16 @@ func (ce *compilationEngine) compileOp(op string) {
 		ce.vw.writeCall("Math", "multiply", 2)
 	case "/":
 		ce.vw.writeCall("Math", "divide", 2)
+	case "&":
+		ce.vw.writeArithmetic(AND)
+	case "|":
+		ce.vw.writeArithmetic(OR)
+	case ">":
+		ce.vw.writeArithmetic(GT)
+	case "<":
+		ce.vw.writeArithmetic(LT)
+	case "=":
+		ce.vw.writeArithmetic(EQ)
 	}
 }
 
