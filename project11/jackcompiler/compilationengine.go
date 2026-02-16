@@ -64,7 +64,7 @@ func (ce *compilationEngine) compileClassVarDec() {
 		ce.jt.advance()
 	case "field":
 		stEntry.index = ce.classSt.fieldCount
-		stEntry.kind = "field"
+		stEntry.kind = "this"
 		ce.jt.advance()
 	default:
 		log.Fatalf("Syntax error at token %s. Expected: static or field", ce.jt.currToken)
@@ -87,7 +87,7 @@ func (ce *compilationEngine) compileClassVarDec() {
 	if stEntry.kind == "static" {
 		ce.classSt.staticCount = stEntry.index + 1
 	}
-	if stEntry.kind == "field" {
+	if stEntry.kind == "this" {
 		ce.classSt.fieldCount = stEntry.index + 1
 	}
 }
@@ -185,7 +185,7 @@ func (ce *compilationEngine) compileSubroutineBody(subroutineName string, subrou
 		ce.vw.writeCall("Memory", "alloc", 1)
 		ce.vw.writePop(POINTER, 0)
 	}
-	if subroutineName == "method" {
+	if subroutineType == "method" {
 		ce.vw.writePush(ARGUMENT, 0)
 		ce.vw.writePop(POINTER, 0)
 	}
@@ -310,7 +310,8 @@ func (ce *compilationEngine) compileWhileStatement() {
 // 'do' subroutineCall ';'
 func (ce *compilationEngine) compileDoStatement() {
 	ce.process("do")
-	ce.compileSubroutineCall(true)
+	ce.compileExpression()
+	ce.vw.writePop(TEMP, 0)
 	ce.process(";")
 }
 
@@ -330,7 +331,7 @@ func (ce *compilationEngine) compileReturnStatement() {
 
 // Performs syntax analysis and outputs XML for a subroutine call
 // subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
-func (ce *compilationEngine) compileSubroutineCall(isDo bool) {
+func (ce *compilationEngine) compileSubroutineCall() {
 	var arg1, arg2 string
 	nVars := 0
 
@@ -348,15 +349,17 @@ func (ce *compilationEngine) compileSubroutineCall(isDo bool) {
 
 		arg2 = ce.jt.currToken
 		ce.jt.advance()
+	} else {
+		ce.vw.writePush(POINTER, 0)
+		nVars += 1
+		arg2 = arg1
+		arg1 = ce.className
 	}
 	ce.process("(")
 	nVars += ce.compileExpressionList()
 	ce.process(")")
 
 	ce.vw.writeCall(arg1, arg2, nVars)
-	if isDo {
-		ce.vw.writePop(TEMP, 0)
-	}
 }
 
 // Performs syntax analysis and outputs XML for an expression list
@@ -404,8 +407,7 @@ func (ce *compilationEngine) compileTerm() {
 		ce.compileUnaryOp(op)
 	} else if len(ce.jt.lineTokens) > 0 && (ce.jt.lineTokens[0] == "." || ce.jt.lineTokens[0] == "(") {
 		// Handle subroutine call case with lookahead
-		ce.compileSubroutineCall(false)
-		fmt.Printf("this is working i guess\n")
+		ce.compileSubroutineCall()
 	} else if len(ce.jt.lineTokens) > 0 && ce.jt.lineTokens[0] == "[" {
 		// TODO: compile array access
 		ce.compileCurrentToken()
