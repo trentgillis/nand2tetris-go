@@ -16,6 +16,7 @@ clean:
 	go clean
 
 test:
+	./tools/TextComparer.sh ./jack/Average/Main.vm ./jack/Average/output/Main.vm
 	./tools/TextComparer.sh ./jack/ConvertToBin/Main.vm ./jack/ConvertToBin/output/Main.vm
 	./tools/TextComparer.sh ./jack/Seven/Main.vm ./jack/Seven/output/Main.vm
 	./tools/TextComparer.sh ./jack/Square/Main.vm ./jack/Square/output/Main.vm
@@ -23,7 +24,7 @@ test:
 	./tools/TextComparer.sh ./jack/Square/SquareGame.vm ./jack/Square/output/SquareGame.vm
 
 run: build
-	# ./jackc ./jack/Average
+	./jackc ./jack/Average
 	# ./jackc ./jack/ComplexArrays
 	./jackc ./jack/ConvertToBin
 	# ./jackc ./jack/Pong

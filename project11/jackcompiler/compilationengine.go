@@ -424,7 +424,13 @@ func (ce *compilationEngine) compileTerm() {
 			}
 			ce.vw.writePush(CONSTANT, val)
 		} else if tokenType(ce.jt.currToken) == TOKEN_STRING_CONST {
-			// TODO: write string const
+			str := ce.jt.currToken[1 : len(ce.jt.currToken)-1]
+			ce.vw.writePush(CONSTANT, len(str))
+			ce.vw.writeCall("String", "new", 1)
+			for _, c := range str {
+				ce.vw.writePush(CONSTANT, int(c))
+				ce.vw.writeCall("String", "appendChar", 2)
+			}
 		} else if tokenType(ce.jt.currToken) == TOKEN_KEYWORD {
 			switch ce.jt.currToken {
 			case "true":
