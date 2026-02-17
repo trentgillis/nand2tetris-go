@@ -28,6 +28,8 @@ func newCompilationEngine(inf *os.File, outf *os.File) compilationEngine {
 	return compilationEngine{inf: inf, outf: outf, jt: jt, vw: vw, classSt: classSt, ifCount: 0, whileCount: 0}
 }
 
+// Processes a token by making sure the passed token matches the current token, and then advances to the next
+// token
 func (ce *compilationEngine) process(token string) {
 	if ce.jt.currToken != token {
 		log.Fatalf("%s - Syntax error at token: %s. Expected: %s\n", ce.outf.Name(), ce.jt.currToken, token)
@@ -35,8 +37,8 @@ func (ce *compilationEngine) process(token string) {
 	ce.jt.advance()
 }
 
-// Performs syntax analysis and outputs XML class declaration. Entrypoint function for the
-// compilation engine and should be called first to begin recursive descent of Jack programs
+// Compiles and outputs vm code for a class declaration. Entrypoint function for the compilation
+// engine and should be called first to begin recursive descent of Jack programs
 // 'class' className '{' classVarDec* subroutineDec* '}'
 func (ce *compilationEngine) compileClass() {
 	ce.process("class")
@@ -52,7 +54,7 @@ func (ce *compilationEngine) compileClass() {
 	ce.process("}")
 }
 
-// Performs syntax analysis and outputs XML for class variable declarations
+// Compiles and outputs vm code for class variable declarations
 // ('static' | 'field') type varName (',' varName)* ';'
 func (ce *compilationEngine) compileClassVarDec() {
 	stEntry := stEntry{}
@@ -92,7 +94,7 @@ func (ce *compilationEngine) compileClassVarDec() {
 	}
 }
 
-// Performs subroutine declaration compilation and outputs appropriate vm code
+// Compiles and outputs vm code for a subroutine
 // ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
 func (ce *compilationEngine) compileSubroutine() {
 	ce.ifCount = 0
@@ -111,18 +113,21 @@ func (ce *compilationEngine) compileSubroutine() {
 	}
 }
 
+// Compiles and outputs vm code for a constructor subroutine
 func (ce *compilationEngine) compileConstructor() {
 	ce.process("constructor")
 	subroutineName := ce.compileSubroutineDeclaration()
 	ce.compileSubroutineBody(subroutineName, "constructor")
 }
 
+// Compiles and outputs vm code for a function subroutine
 func (ce *compilationEngine) compileFunction() {
 	ce.process("function")
 	subroutineName := ce.compileSubroutineDeclaration()
 	ce.compileSubroutineBody(subroutineName, "function")
 }
 
+// Compiles and outputs vm code for a method subroutine
 func (ce *compilationEngine) compileMethod() {
 	ce.process("method")
 	ce.routineSt.table["this"] = stEntry{
@@ -151,7 +156,7 @@ func (ce *compilationEngine) compileSubroutineDeclaration() string {
 	return subroutineName
 }
 
-// Performs syntax analysis and outputs XML for parameter list declaration
+// Compiles and outputs vm code for parameter list declaration
 // ((type varName) (',' varName)*)?
 func (ce *compilationEngine) compileParameterList() {
 	stEntry := stEntry{kind: "argument", index: ce.routineSt.argCount}
@@ -169,7 +174,7 @@ func (ce *compilationEngine) compileParameterList() {
 	ce.routineSt.argCount = stEntry.index + 1
 }
 
-// Performs syntax analysis and outputs XML for subroutine bodies
+// Compiles and outputs vm code for subroutine bodies
 // '{' varDec* statements '}'
 func (ce *compilationEngine) compileSubroutineBody(subroutineName string, subroutineType string) {
 	nVars := 0
@@ -193,7 +198,7 @@ func (ce *compilationEngine) compileSubroutineBody(subroutineName string, subrou
 	ce.process("}")
 }
 
-// Performs syntax analysis and outputs XML for variable declarations in a subroutine body
+// Compiles and outputs vm code for variable declarations in a subroutine body
 // 'var' type varName (',' type varName)* ';'
 func (ce *compilationEngine) compileVarDec() int {
 	nVars := 1
@@ -217,7 +222,7 @@ func (ce *compilationEngine) compileVarDec() int {
 	return nVars
 }
 
-// Performs syntax analysis and outputs XML for one or more statements
+// Compiles and outputs vm code for one or more statements
 // (letStatement | ifStatement | whileStatement | doStatement | returnStatement)*
 func (ce *compilationEngine) compileStatements() {
 	for slices.Contains([]string{"let", "if", "while", "do", "return"}, ce.jt.currToken) {
@@ -236,7 +241,7 @@ func (ce *compilationEngine) compileStatements() {
 	}
 }
 
-// Performs compilation of let statements
+// Compiles and outputs vm code for a let statement
 // 'let' varName ('[' expression ']')? '=' expression ';'
 func (ce *compilationEngine) compileLetStatement() {
 	isLetArr := false
@@ -264,7 +269,7 @@ func (ce *compilationEngine) compileLetStatement() {
 	ce.process(";")
 }
 
-// Performs syntax analysis and outputs XML for an if statement
+// Compile and outputs vm code for an if statement
 // 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
 func (ce *compilationEngine) compileIfStatement() {
 	ifTrueLabel := fmt.Sprintf("IF_TRUE%d", ce.ifCount)
@@ -295,7 +300,7 @@ func (ce *compilationEngine) compileIfStatement() {
 	}
 }
 
-// Performs syntax analysis and outputs XML for a while statement
+// Compile and outputs vm code for a while statement
 // 'while' '(' expression ')' '{' statements '}'
 func (ce *compilationEngine) compileWhileStatement() {
 	whileExpLabel := fmt.Sprintf("WHILE_EXP%d", ce.whileCount)
@@ -316,7 +321,7 @@ func (ce *compilationEngine) compileWhileStatement() {
 	ce.vw.writeLabel(whileEndLabel)
 }
 
-// Performs syntax analysis and outputs XML for a do statement
+// Compiles and outputs vm code for a do statement
 // 'do' subroutineCall ';'
 func (ce *compilationEngine) compileDoStatement() {
 	ce.process("do")
@@ -325,7 +330,7 @@ func (ce *compilationEngine) compileDoStatement() {
 	ce.process(";")
 }
 
-// Performs syntax analysis and outputs XML for a return statement
+// Compiles and outputs vm code for a return statement
 // 'return' expression? ';'
 func (ce *compilationEngine) compileReturnStatement() {
 	ce.process("return")
@@ -338,7 +343,7 @@ func (ce *compilationEngine) compileReturnStatement() {
 	ce.process(";")
 }
 
-// Performs syntax analysis and outputs XML for a subroutine call
+// Compiles and outputs vm code for a subroutine call
 // subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
 func (ce *compilationEngine) compileSubroutineCall() {
 	var arg1, arg2 string
@@ -371,7 +376,7 @@ func (ce *compilationEngine) compileSubroutineCall() {
 	ce.vw.writeCall(arg1, arg2, nVars)
 }
 
-// Performs syntax analysis and outputs XML for an expression list
+// Compiles and outputs vm code for an expression list
 // (expression (',' expression)*)?
 func (ce *compilationEngine) compileExpressionList() int {
 	nVars := 0
@@ -388,7 +393,7 @@ func (ce *compilationEngine) compileExpressionList() int {
 	return nVars
 }
 
-// Performs syntax analysis and outputs XML for an expression
+// Compile and outputs vm code for an expression
 // term (op term)*
 func (ce *compilationEngine) compileExpression() {
 	ce.compileTerm()
@@ -430,6 +435,7 @@ func (ce *compilationEngine) compileTerm() {
 	}
 }
 
+// Compiles and outputs vm code for a term involving array access
 func (ce *compilationEngine) compileArrayAccess() {
 	identifier, _ := ce.lookupVar(ce.jt.currToken)
 	ce.jt.advance()
@@ -442,6 +448,7 @@ func (ce *compilationEngine) compileArrayAccess() {
 	ce.vw.writePush(THAT, 0)
 }
 
+// Compiles and outputs vm code for a term involving a keyword
 func (ce *compilationEngine) compileKeyword() {
 	switch ce.jt.currToken {
 	case "true":
@@ -454,7 +461,9 @@ func (ce *compilationEngine) compileKeyword() {
 	}
 }
 
+// Compiles and outputs vm code for a term involving an integer constant
 func (ce *compilationEngine) compileIntConstant() {
+	// Compiles and outputs vm code for a term involving an integer constant
 	val, err := strconv.Atoi(ce.jt.currToken)
 	if err != nil {
 		log.Fatal(err)
@@ -462,6 +471,7 @@ func (ce *compilationEngine) compileIntConstant() {
 	ce.vw.writePush(CONSTANT, val)
 }
 
+// Compiles and outputs vm code for a term involving a string literal
 func (ce *compilationEngine) compileStringLiteral() {
 	str := ce.jt.currToken[1 : len(ce.jt.currToken)-1]
 	ce.vw.writePush(CONSTANT, len(str))
@@ -472,6 +482,7 @@ func (ce *compilationEngine) compileStringLiteral() {
 	}
 }
 
+// Compiles and outputs vm code for an operator
 func (ce *compilationEngine) compileOp(op string) {
 	switch op {
 	case "+":
@@ -495,6 +506,7 @@ func (ce *compilationEngine) compileOp(op string) {
 	}
 }
 
+// Compiles and outputs vm code for a unary operator
 func (ce *compilationEngine) compileUnaryOp() {
 	op := ce.jt.currToken
 	ce.jt.advance()
@@ -507,6 +519,7 @@ func (ce *compilationEngine) compileUnaryOp() {
 	}
 }
 
+// Compiles and outputs vm code for a type
 func (ce *compilationEngine) compileType() {
 	switch ce.jt.currToken {
 	case "void":
@@ -523,6 +536,8 @@ func (ce *compilationEngine) compileType() {
 	}
 }
 
+// Performs a variable lookup by looking at the routine and class symbol tables and returns
+// the variables symbol table entry and whether or not it was found
 func (ce *compilationEngine) lookupVar(varName string) (stEntry, bool) {
 	varEntry, ok := ce.routineSt.table[varName]
 	if !ok {
