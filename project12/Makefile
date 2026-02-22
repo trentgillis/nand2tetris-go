@@ -17,3 +17,5 @@ compile:
 	./tools/JackCompiler.sh ./test/ScreenTest
 	cp ./String.jack test/StringTest
 	./tools/JackCompiler.sh ./test/StringTest
+	cp ./Sys.jack test/SysTest
+	./tools/JackCompiler.sh ./test/SysTest
