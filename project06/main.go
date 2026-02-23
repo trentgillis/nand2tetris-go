@@ -23,6 +23,5 @@ func main() {
 	}
 	defer f.Close()
 
-	a := assembler.New(f)
-	a.Assemble()
+	assembler.Assemble(f)
 }

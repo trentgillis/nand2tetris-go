@@ -19,7 +19,7 @@ type Parser struct {
 	currInst     string
 }
 
-func NewParser(f *os.File) Parser {
+func newParser(f *os.File) Parser {
 	return Parser{
 		HasMoreLines: true,
 		scanner:      bufio.NewScanner(f),
@@ -44,7 +44,7 @@ func (p *Parser) Advance() {
 	}
 }
 
-func (p *Parser) CurrInstType() int {
+func (p *Parser) currInstType() int {
 	if strings.HasPrefix(p.currInst, "@") {
 		return A_INSTRUCTION
 	}
@@ -54,7 +54,7 @@ func (p *Parser) CurrInstType() int {
 	return C_INSTRUCTION
 }
 
-func (p *Parser) Symbol() string {
+func (p *Parser) symbol() string {
 	var after string
 	if strings.HasPrefix(p.currInst, "@") {
 		after, _ = strings.CutPrefix(p.currInst, "@")
@@ -66,14 +66,14 @@ func (p *Parser) Symbol() string {
 	return after
 }
 
-func (p *Parser) Dest() string {
+func (p *Parser) dest() string {
 	if !strings.Contains(p.currInst, "=") {
 		return "null"
 	}
 	return strings.Split(p.currInst, "=")[0]
 }
 
-func (p *Parser) Comp() string {
+func (p *Parser) comp() string {
 	comp := p.currInst
 	if strings.Contains(comp, "=") {
 		comp = strings.Split(comp, "=")[1]
@@ -84,7 +84,7 @@ func (p *Parser) Comp() string {
 	return comp
 }
 
-func (p *Parser) Jump() string {
+func (p *Parser) jump() string {
 	if !strings.Contains(p.currInst, ";") {
 		return "null"
 	}

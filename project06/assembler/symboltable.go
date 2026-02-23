@@ -5,7 +5,7 @@ type SymbolTable struct {
 	symbols  map[string]int
 }
 
-func NewSymbolTable() SymbolTable {
+func newSymbolTable() SymbolTable {
 	return SymbolTable{
 		currAddr: 16,
 		symbols: map[string]int{
@@ -36,21 +36,21 @@ func NewSymbolTable() SymbolTable {
 	}
 }
 
-func (st SymbolTable) GetAddr(symbol string) int {
+func (st SymbolTable) getAddr(symbol string) int {
 	return st.symbols[symbol]
 }
 
-func (st SymbolTable) Contains(symbol string) bool {
+func (st SymbolTable) contains(symbol string) bool {
 	_, ok := st.symbols[symbol]
 	return ok
 }
 
-func (st *SymbolTable) AddEntry(symbol string, addr int) int {
+func (st *SymbolTable) addEntry(symbol string, addr int) int {
 	st.symbols[symbol] = addr
 	return addr
 }
 
-func (st *SymbolTable) AddVar(symbol string) int {
+func (st *SymbolTable) addVar(symbol string) int {
 	st.symbols[symbol] = st.currAddr
 	st.currAddr += 1
 	return st.currAddr

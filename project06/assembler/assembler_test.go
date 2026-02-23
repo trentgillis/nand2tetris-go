@@ -58,9 +58,7 @@ func TestAssembler(t *testing.T) {
 			}
 			defer inputFile.Close()
 
-			assembler := New(inputFile)
-			assembler.Assemble()
-			assembler.outfile.Close()
+			Assemble(inputFile)
 
 			outputPath := strings.Replace(tc.asmFilePath, ".asm", ".hack", 1)
 			generatedContent, err := os.ReadFile(outputPath)
@@ -105,10 +103,7 @@ func TestAssemblerCleanup(t *testing.T) {
 		t.Fatalf("Failed to open temp input file: %v", err)
 	}
 
-	assembler := New(inputFile)
-	assembler.Assemble()
-	inputFile.Close()
-	assembler.outfile.Close()
+	Assemble(inputFile)
 
 	if _, err := os.Stat(tmpHackPath); os.IsNotExist(err) {
 		t.Errorf("Output file was not created: %s", tmpHackPath)

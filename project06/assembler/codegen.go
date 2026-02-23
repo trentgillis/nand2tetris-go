@@ -49,7 +49,7 @@ var jumpMapping = map[string]string{
 
 type CodeGen struct{}
 
-func (cg CodeGen) Dest(dest string) string {
+func (cg CodeGen) dest(dest string) string {
 	bin := []rune{'0', '0', '0'}
 	if strings.Contains(dest, "A") {
 		bin[0] = '1'
@@ -63,7 +63,7 @@ func (cg CodeGen) Dest(dest string) string {
 	return string(bin)
 }
 
-func (cg CodeGen) Comp(comp string) string {
+func (cg CodeGen) comp(comp string) string {
 	bin, ok := compMapping[comp]
 	if !ok {
 		log.Fatal("codegen: Invalid comp value passed to Comp()")
@@ -71,7 +71,7 @@ func (cg CodeGen) Comp(comp string) string {
 	return bin
 }
 
-func (cg CodeGen) Jump(jump string) string {
+func (cg CodeGen) jump(jump string) string {
 	bin, ok := jumpMapping[jump]
 	if !ok {
 		log.Fatal("codegen: Invalid jump value passed to Jump()")
